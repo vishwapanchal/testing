@@ -76,7 +76,7 @@ export function GlobalNav() {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
-        className="pointer-events-auto max-w-7xl mx-auto rounded-full bg-white/70 backdrop-blur-xl border border-white/40 shadow-sm px-4 sm:px-6 py-2.5 flex items-center justify-between gap-4"
+        className="pointer-events-auto w-full max-w-7xl mx-auto rounded-full bg-white/70 backdrop-blur-xl border border-white/40 shadow-sm px-4 sm:px-6 py-2.5 flex items-center justify-between gap-2 sm:gap-4"
       >
         {/* Left: Logo + Nav */}
         <div className="flex items-center gap-2 sm:gap-6 shrink-0">

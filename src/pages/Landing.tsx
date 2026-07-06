@@ -1,96 +1,29 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { Shield, Activity, Brain, Zap, Clock, ArrowRight, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useRef } from "react";
 
 export default function Landing() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { scrollY } = useScroll();
-  const headerY = useTransform(scrollY, [0, 50], [0, -10]);
-  const headerOpacity = useTransform(scrollY, [0, 50], [1, 0.9]);
   
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Typewriter effect
-  const words = useMemo(() => ["Modern ICUs.", "Critical Care.", "Rapid Response.", "Healthcare."], []);
-  const [currentWord, setCurrentWord] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [loopNum, setLoopNum] = useState(0);
-  const [typingSpeed, setTypingSpeed] = useState(100);
-
-  useEffect(() => {
-    const handleTyping = () => {
-      const i = loopNum % words.length;
-      const fullText = words[i];
-
-      setCurrentWord(
-        isDeleting
-          ? fullText.substring(0, currentWord.length - 1)
-          : fullText.substring(0, currentWord.length + 1)
-      );
-
-      setTypingSpeed(isDeleting ? 40 : 120);
-
-      if (!isDeleting && currentWord === fullText) {
-        setTimeout(() => setIsDeleting(true), 2000);
-      } else if (isDeleting && currentWord === "") {
-        setIsDeleting(false);
-        setLoopNum(loopNum + 1);
-      }
-    };
-
-    const timer = setTimeout(handleTyping, typingSpeed);
-    return () => clearTimeout(timer);
-  }, [currentWord, isDeleting, loopNum, typingSpeed, words]);
 
   return (
     <div className="min-h-screen bg-slate-50 selection:bg-blue-200 selection:text-blue-900 overflow-x-hidden font-sans">
       
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden flex justify-center">
-        <div className="absolute -top-[20%] -left-[10%] w-[50vw] h-[50vw] rounded-full bg-blue-100/40 blur-[100px]" />
-        <div className="absolute top-[20%] -right-[10%] w-[40vw] h-[40vw] rounded-full bg-emerald-100/30 blur-[120px]" />
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] aspect-square rounded-full bg-blue-100/40 blur-[100px]" />
+        <div className="absolute top-[20%] -right-[10%] w-[40%] aspect-square rounded-full bg-emerald-100/30 blur-[120px]" />
       </div>
 
-      {/* Floating Header */}
-      <motion.nav 
-        style={{ y: headerY, opacity: headerOpacity }}
-        className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 pt-4 pb-2"
-      >
-        <div className="max-w-6xl mx-auto rounded-full bg-white/80 border border-slate-200/60 backdrop-blur-xl shadow-sm px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
-            <Logo size={28} />
-            <span style={{ fontFamily: "'Outfit', sans-serif" }} className="font-extrabold text-base tracking-tight text-slate-800 hidden sm:block ml-2">
-              SEPSIS<span className="text-blue-600">SENTINEL</span>
-            </span>
-          </div>
-
-          {/* Middle Typing Animation */}
-          <div className="hidden md:flex items-center absolute left-1/2 -translate-x-1/2 text-sm font-medium text-slate-600">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 italic font-serif pr-1 relative z-10 drop-shadow-sm font-semibold">{currentWord}</span>
-            <span className="w-0.5 h-4 bg-blue-500 animate-pulse rounded-full"></span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" className="rounded-full text-slate-600 hover:bg-slate-100 hidden sm:flex font-semibold" onClick={() => navigate("/login")}>
-                Sign In
-              </Button>
-              <Button onClick={() => navigate("/register")} className="rounded-full bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 transition-all font-semibold px-5">
-                Get Started
-              </Button>
-            </div>
-          </div>
-        </div>
-      </motion.nav>
-
       {/* Crisp Minimalist Hero Section - Split Layout */}
-      <section className="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-12 min-h-screen flex flex-col items-center bg-slate-50 overflow-hidden" ref={containerRef}>
-        <div className="absolute top-[10%] left-1/4 -translate-x-1/2 w-[80vw] h-[80vw] rounded-full bg-blue-50/50 blur-[120px] pointer-events-none" />
+      <section className="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-12 min-h-[calc(100vh-5rem)] flex flex-col items-center bg-slate-50 overflow-hidden" ref={containerRef}>
+        <div className="absolute top-[10%] left-1/4 -translate-x-1/2 w-[80%] aspect-square rounded-full bg-blue-50/50 blur-[120px] pointer-events-none" />
         
         <div className="relative z-20 w-full max-w-7xl mx-auto px-6 mt-8 flex flex-col lg:flex-row items-center justify-between gap-12">
           {/* Left Column: Typography & CTAs */}
@@ -100,7 +33,7 @@ export default function Landing() {
             {/* Massive Heading */}
             <motion.h1 
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-slate-900 tracking-tight leading-[1.05]"
+              className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-slate-900 tracking-tight leading-[1.05] break-words"
               style={{ fontFamily: "'Overpass', sans-serif" }}
             >
               Precision Intelligence <br className="hidden lg:block"/> for <br className="lg:hidden"/>
@@ -116,7 +49,7 @@ export default function Landing() {
             
             <motion.p 
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="text-lg lg:text-xl text-slate-500 max-w-xl mt-8 font-normal leading-relaxed"
+              className="text-lg lg:text-xl text-slate-500 max-w-xl mt-8 font-normal leading-relaxed break-words"
             >
               Eradicate preventable deterioration. Our advanced ML pipeline detects sepsis up to <span className="font-semibold text-slate-800">4 hours before</span> traditional protocols.
             </motion.p>
@@ -242,7 +175,7 @@ export default function Landing() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="w-full mt-24 lg:mt-32 mb-10 relative z-10 px-6 flex justify-center"
         >
-          <div className="inline-flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 py-5 px-10 rounded-2xl sm:rounded-full bg-white/60 border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
+          <div className="inline-flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 py-5 px-6 sm:px-10 w-full sm:w-auto rounded-2xl sm:rounded-full bg-white/60 border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 ring-1 ring-blue-100/50">
                 <Activity className="w-6 h-6 text-blue-600" />
@@ -288,8 +221,8 @@ export default function Landing() {
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }}
             className="text-center max-w-2xl mx-auto mb-20 space-y-4"
           >
-            <h2 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter font-sora">Intelligence at every layer.</h2>
-            <p className="text-slate-500 font-medium text-xl leading-relaxed">Our 5-stage pipeline combines raw clinical data with quantum-inspired risk assessment to prevent critical deterioration.</p>
+            <h2 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter font-sora break-words">Intelligence at every layer.</h2>
+            <p className="text-slate-500 font-medium text-xl leading-relaxed break-words">Our 5-stage pipeline combines raw clinical data with quantum-inspired risk assessment to prevent critical deterioration.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 auto-rows-[350px]">
