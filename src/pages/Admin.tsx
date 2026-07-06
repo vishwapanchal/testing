@@ -12,13 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Shield, ShieldAlert } from "lucide-react";
+import { UserPlus, Shield, ShieldAlert, Users, Building2, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 import type { StaffRole } from "@/hooks/useAuth";
 
 const ROLE_BADGE: Record<string, string> = {
-  attending: "bg-primary/20 text-primary border-primary/30",
-  nurse: "bg-tier-watch/20 text-tier-watch border-tier-watch/30",
-  admin: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  attending: "bg-blue-50 text-blue-700 border-blue-200",
+  nurse: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  admin: "bg-purple-50 text-purple-700 border-purple-200",
 };
 
 export default function Admin() {
@@ -92,121 +93,164 @@ export default function Admin() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-100 font-sans">
       <GlobalNav />
       <main className="p-6 max-w-[1200px] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-mono font-bold text-foreground">Staff Management</h1>
-            <p className="text-xs font-mono text-muted-foreground mt-1">
-              {profile.hospital_name} · {staffList?.length ?? 0} staff members
-            </p>
+        {/* ── Page Header ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="flex items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-slate-100 border border-slate-200 flex items-center justify-center shadow-sm">
+              <Users className="h-5 w-5 text-purple-600" />
+            </div>
+            <div>
+              <h1 className="font-['Outfit'] text-xl font-bold text-slate-900 tracking-tight">
+                Staff Management
+              </h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                <Building2 className="h-3 w-3 text-slate-400" />
+                <p className="text-xs text-slate-500">
+                  {profile.hospital_name} · {staffList?.length ?? 0} staff members
+                </p>
+              </div>
+            </div>
           </div>
+
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="font-mono text-xs gap-2">
+              <Button className="text-xs gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-900/10 font-medium">
                 <UserPlus className="h-4 w-4" />
                 Add Staff
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-white border-slate-200 shadow-2xl rounded-2xl">
               <DialogHeader>
-                <DialogTitle className="font-mono text-base">Add Staff Member</DialogTitle>
+                <DialogTitle className="text-base font-semibold text-slate-900">
+                  Add Staff Member
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleAddStaff} className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-xs font-mono">Full Name</Label>
+                  <Label className="text-xs text-slate-600 font-medium">Full Name</Label>
                   <Input
                     placeholder="Dr. Sharma"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    className="font-mono text-sm"
+                    className="text-sm rounded-xl border-slate-200 bg-white focus:ring-slate-300"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-mono">Email</Label>
+                  <Label className="text-xs text-slate-600 font-medium">Email</Label>
                   <Input
                     type="email"
                     placeholder="staff@aiims.edu"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
-                    className="font-mono text-sm"
+                    className="text-sm rounded-xl border-slate-200 bg-white focus:ring-slate-300"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-mono">Role</Label>
+                  <Label className="text-xs text-slate-600 font-medium">Role</Label>
                   <Select value={newRole} onValueChange={(v) => setNewRole(v as StaffRole)}>
-                    <SelectTrigger className="font-mono text-sm">
+                    <SelectTrigger className="text-sm rounded-xl border-slate-200 bg-white">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="nurse">Nurse</SelectItem>
-                      <SelectItem value="attending">Attending</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                    <SelectContent className="rounded-xl shadow-xl border-slate-200">
+                      <SelectItem value="nurse" className="text-sm focus:bg-slate-50">Nurse</SelectItem>
+                      <SelectItem value="attending" className="text-sm focus:bg-slate-50">Attending</SelectItem>
+                      <SelectItem value="admin" className="text-sm focus:bg-slate-50">Admin</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs font-mono">Employee ID</Label>
+                  <Label className="text-xs text-slate-600 font-medium">Employee ID</Label>
                   <Input
                     placeholder="EMP-001"
                     value={newEmployeeId}
                     onChange={(e) => setNewEmployeeId(e.target.value)}
-                    className="font-mono text-sm"
+                    className="text-sm rounded-xl border-slate-200 bg-white focus:ring-slate-300"
                   />
                 </div>
-                <Button type="submit" className="w-full font-mono text-sm" disabled={submitting}>
-                  {submitting ? "Adding..." : "Add Staff Member"}
+                <Button
+                  type="submit"
+                  className="w-full text-sm rounded-xl bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-900/10 font-medium"
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Adding...</>
+                  ) : (
+                    "Add Staff Member"
+                  )}
                 </Button>
               </form>
             </DialogContent>
           </Dialog>
-        </div>
+        </motion.div>
 
-        <div className="rounded-lg border border-border bg-card overflow-hidden">
+        {/* ── Staff Table ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4, ease: "easeOut" }}
+          className="bg-white border border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl overflow-hidden"
+        >
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground font-mono text-sm">Loading staff...</div>
+            <div className="p-12 text-center text-slate-500 text-sm flex flex-col items-center gap-3">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+              Loading staff...
+            </div>
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="font-mono text-xs">Name</TableHead>
-                  <TableHead className="font-mono text-xs">Role</TableHead>
-                  <TableHead className="font-mono text-xs">Department</TableHead>
-                  <TableHead className="font-mono text-xs">Employee ID</TableHead>
+                <TableRow className="bg-slate-50/80 border-b border-slate-100">
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Name</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Role</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Department</TableHead>
+                  <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Employee ID</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {staffList?.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell className="font-mono text-sm">
-                      <div className="flex items-center gap-2">
-                        {s.role === "admin" ? (
-                          <ShieldAlert className="h-4 w-4 text-purple-400" />
-                        ) : (
-                          <Shield className="h-4 w-4 text-muted-foreground" />
-                        )}
+                  <TableRow key={s.id} className="border-b border-slate-100 hover:bg-slate-50/60 transition-colors">
+                    <TableCell className="text-sm font-medium text-slate-900">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                          s.role === "admin"
+                            ? "bg-purple-50 border border-purple-200"
+                            : "bg-slate-100 border border-slate-200"
+                        }`}>
+                          {s.role === "admin" ? (
+                            <ShieldAlert className="h-3.5 w-3.5 text-purple-600" />
+                          ) : (
+                            <Shield className="h-3.5 w-3.5 text-slate-500" />
+                          )}
+                        </div>
                         {s.full_name || "—"}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`font-mono text-[10px] ${ROLE_BADGE[s.role] || ""}`}>
+                      <Badge variant="outline" className={`text-[10px] font-semibold uppercase tracking-wide ${ROLE_BADGE[s.role] || "bg-slate-50 text-slate-600 border-slate-200"}`}>
                         {s.role}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">
+                    <TableCell className="text-xs text-slate-500">
                       {s.department || "ICU"}
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-muted-foreground">
+                    <TableCell className="text-xs text-slate-500 font-mono">
                       {s.employee_id || "—"}
                     </TableCell>
                   </TableRow>
                 ))}
                 {(!staffList || staffList.length === 0) && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground font-mono text-sm py-8">
+                    <TableCell colSpan={4} className="text-center text-slate-400 text-sm py-12">
+                      <Users className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                       No staff members found
                     </TableCell>
                   </TableRow>
@@ -214,7 +258,7 @@ export default function Admin() {
               </TableBody>
             </Table>
           )}
-        </div>
+        </motion.div>
       </main>
     </div>
   );

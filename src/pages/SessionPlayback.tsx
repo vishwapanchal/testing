@@ -8,12 +8,13 @@ import { GlobalNav } from "@/components/layout/GlobalNav";
 import {
   Shield, Activity, Play, Pause, Square, Upload, FileText,
   SkipForward, AlertCircle, Heart, Wind, Thermometer, Droplets,
-  ChevronRight, Zap, TrendingUp, Clock
+  ChevronRight, Zap, TrendingUp, Clock, AlertTriangle
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { predict } from "@/lib/demoEngine";
+import { motion } from "framer-motion";
 
 /* ───────────────────── Types ───────────────────── */
 
@@ -94,21 +95,21 @@ function parseCsv(text: string): CsvRow[] {
 
 function getAlertColor(level: string) {
   switch (level) {
-    case "WATCH": return "from-emerald-500/30 to-emerald-600/10 border-emerald-500/50 text-emerald-400";
-    case "AMBER": return "from-amber-500/30 to-amber-600/10 border-amber-500/50 text-amber-400";
-    case "CRITICAL": return "from-red-500/30 to-red-600/10 border-red-500/50 text-red-400";
-    case "FAST-TRACK": return "from-red-600/40 to-red-700/20 border-red-600/70 text-red-300";
-    default: return "from-gray-500/20 to-gray-600/10 border-gray-500/50 text-gray-400";
+    case "WATCH": return "from-emerald-50 to-emerald-100/60 border-emerald-200 text-emerald-700";
+    case "AMBER": return "from-amber-50 to-amber-100/60 border-amber-200 text-amber-700";
+    case "CRITICAL": return "from-red-50 to-red-100/60 border-red-200 text-red-700";
+    case "FAST-TRACK": return "from-red-100 to-red-200/60 border-red-300 text-red-800";
+    default: return "from-slate-50 to-slate-100/60 border-slate-200 text-slate-600";
   }
 }
 
 function getAlertBadgeClass(level: string) {
   switch (level) {
-    case "WATCH": return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50";
-    case "AMBER": return "bg-amber-500/20 text-amber-400 border-amber-500/50";
-    case "CRITICAL": return "bg-red-500/20 text-red-400 border-red-500/50";
-    case "FAST-TRACK": return "bg-red-600/30 text-red-300 border-red-600/70";
-    default: return "bg-gray-500/20 text-gray-400 border-gray-500/50";
+    case "WATCH": return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    case "AMBER": return "bg-amber-50 text-amber-700 border-amber-200";
+    case "CRITICAL": return "bg-red-50 text-red-700 border-red-200";
+    case "FAST-TRACK": return "bg-red-100 text-red-800 border-red-300";
+    default: return "bg-slate-50 text-slate-600 border-slate-200";
   }
 }
 
@@ -123,33 +124,37 @@ function VitalGauge({
   const pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
   const isWarning = warning !== undefined && (value >= warning || value <= min + (max - min) * 0.1);
   const isCritical = critical !== undefined && (value >= critical || value <= min + (max - min) * 0.05);
-  const statusColor = isCritical ? "text-red-400" : isWarning ? "text-amber-400" : color;
+  const statusColor = isCritical ? "text-red-600" : isWarning ? "text-amber-600" : color;
 
   return (
-    <div className={`relative p-4 rounded-xl border backdrop-blur-sm transition-all duration-300 ${
+    <div className={`relative p-4 rounded-xl border bg-white transition-all duration-300 shadow-sm ${
       isCritical
-        ? "border-red-500/50 bg-red-500/5 shadow-lg shadow-red-500/10"
+        ? "border-red-200 shadow-md shadow-red-100"
         : isWarning
-        ? "border-amber-500/40 bg-amber-500/5"
-        : "border-white/10 bg-white/5"
+        ? "border-amber-200 shadow-md shadow-amber-100"
+        : "border-slate-200"
     }`}>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Icon className={`h-4 w-4 ${statusColor}`} />
-          <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{label}</span>
+          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500">{label}</span>
         </div>
-        {isCritical && <span className="text-[9px] font-bold text-red-400 animate-pulse">⚠ CRITICAL</span>}
+        {isCritical && (
+          <span className="text-[9px] font-bold text-red-600 animate-pulse flex items-center gap-0.5">
+            <AlertTriangle className="h-3 w-3" /> CRITICAL
+          </span>
+        )}
       </div>
       <div className="flex items-baseline gap-1.5">
         <span className={`text-3xl font-bold font-mono tabular-nums ${statusColor} transition-all duration-500`}>
           {value === 0 ? "---" : value.toFixed(0)}
         </span>
-        <span className="text-xs text-muted-foreground">{unit}</span>
+        <span className="text-xs text-slate-400">{unit}</span>
       </div>
-      <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
+      <div className="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
-            isCritical ? "bg-red-500" : isWarning ? "bg-amber-500" : "bg-gradient-to-r " + color.replace("text-", "from-") + " to-white/50"
+            isCritical ? "bg-red-500" : isWarning ? "bg-amber-500" : "bg-gradient-to-r from-slate-400 to-slate-300"
           }`}
           style={{ width: `${pct}%` }}
         />
@@ -178,36 +183,36 @@ function MiniRiskChart({ predictions }: { predictions: TimelinePrediction[] }) {
     <div className="relative">
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-16" preserveAspectRatio="none">
         {/* Danger zone background */}
-        <rect x="0" y="0" width={width} height={height * 0.3} fill="rgba(239,68,68,0.05)" />
+        <rect x="0" y="0" width={width} height={height * 0.3} fill="rgba(239,68,68,0.06)" />
         {/* Threshold lines */}
-        <line x1="0" y1={height * 0.5} x2={width} y2={height * 0.5} stroke="rgba(234,179,8,0.2)" strokeDasharray="2 2" />
-        <line x1="0" y1={height * 0.3} x2={width} y2={height * 0.3} stroke="rgba(239,68,68,0.2)" strokeDasharray="2 2" />
+        <line x1="0" y1={height * 0.5} x2={width} y2={height * 0.5} stroke="rgba(234,179,8,0.25)" strokeDasharray="2 2" />
+        <line x1="0" y1={height * 0.3} x2={width} y2={height * 0.3} stroke="rgba(239,68,68,0.25)" strokeDasharray="2 2" />
         {/* Area fill */}
-        <path d={areaData} fill="url(#riskGradient)" opacity="0.3" />
+        <path d={areaData} fill="url(#riskGradientLight)" opacity="0.5" />
         {/* Line */}
-        <path d={pathData} fill="none" stroke="url(#riskLineGradient)" strokeWidth="1.5" strokeLinecap="round" />
+        <path d={pathData} fill="none" stroke="url(#riskLineGradientLight)" strokeWidth="1.5" strokeLinecap="round" />
         {/* Last point dot */}
         {pts.length > 0 && (() => {
           const last = pts[pts.length - 1];
           const x = ((pts.length - 1) / (maxPoints - 1)) * width;
           const y = height - (last.result.risk_score * height);
-          return <circle cx={x} cy={y} r="2.5" fill="#22d3ee" className="animate-pulse" />;
+          return <circle cx={x} cy={y} r="2.5" fill="#0f172a" className="animate-pulse" />;
         })()}
         <defs>
-          <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+          <linearGradient id="riskGradientLight" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#0f172a" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="#0f172a" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="riskLineGradient" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#06b6d4" />
-            <stop offset="100%" stopColor="#22d3ee" />
+          <linearGradient id="riskLineGradientLight" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#475569" />
+            <stop offset="100%" stopColor="#0f172a" />
           </linearGradient>
         </defs>
       </svg>
-      <div className="flex justify-between text-[9px] text-muted-foreground font-mono mt-0.5">
+      <div className="flex justify-between text-[9px] text-slate-400 font-mono mt-0.5">
         <span>0%</span>
-        <span className="text-amber-500/60">50%</span>
-        <span className="text-red-500/60">100%</span>
+        <span className="text-amber-600/60">50%</span>
+        <span className="text-red-600/60">100%</span>
       </div>
     </div>
   );
@@ -397,27 +402,37 @@ export default function SessionPlayback() {
 
   /* ───────── Render ───────── */
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-100 font-sans">
       <GlobalNav />
 
       <main className="p-4 sm:p-6 max-w-[1600px] mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/20">
-            <Activity className="h-6 w-6 text-cyan-400" />
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="flex items-center gap-3 mb-6"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-slate-100 border border-slate-200 flex items-center justify-center shadow-sm">
+            <Activity className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Session Playback</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="font-['Outfit'] text-2xl font-bold tracking-tight text-slate-900">Session Playback</h1>
+            <p className="text-sm text-slate-500">
               Upload sensor recordings from Jetson Nano and replay with live ML predictions
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* ─── Upload Phase ─── */}
         {phase === "upload" && (
-          <div className="max-w-2xl mx-auto">
-            <Card className="border-dashed border-2 border-white/10 hover:border-cyan-500/30 transition-colors">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="max-w-2xl mx-auto"
+          >
+            <Card className="border-dashed border-2 border-slate-200 bg-white shadow-xl shadow-slate-200/50 rounded-2xl hover:border-slate-300 transition-colors">
               <CardContent className="p-12">
                 <div
                   className={`flex flex-col items-center justify-center text-center transition-all duration-200 ${
@@ -434,16 +449,16 @@ export default function SessionPlayback() {
                 >
                   <div className={`p-6 rounded-2xl mb-4 transition-all duration-300 ${
                     isDragOver
-                      ? "bg-cyan-500/20 border border-cyan-500/40"
-                      : "bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border border-white/5"
+                      ? "bg-blue-50 border border-blue-200"
+                      : "bg-gradient-to-br from-slate-100 to-slate-50 border border-slate-200"
                   }`}>
-                    <Upload className={`h-12 w-12 ${isDragOver ? "text-cyan-400 animate-bounce" : "text-muted-foreground/50"}`} />
+                    <Upload className={`h-12 w-12 ${isDragOver ? "text-blue-500 animate-bounce" : "text-slate-400"}`} />
                   </div>
-                  <h3 className="text-lg font-semibold mb-1">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-1">
                     {isDragOver ? "Drop your CSV file" : "Upload Sensor Recording"}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Drag & drop a <code className="text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded text-xs">session_log_*.csv</code> file from Jetson Nano
+                  <p className="text-sm text-slate-500 mb-4">
+                    Drag & drop a <code className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded text-xs border border-slate-200">session_log_*.csv</code> file from Jetson Nano
                   </p>
                   <label>
                     <input
@@ -455,68 +470,73 @@ export default function SessionPlayback() {
                         if (file) handleFile(file);
                       }}
                     />
-                    <Button variant="outline" className="cursor-pointer" asChild>
+                    <Button variant="outline" className="cursor-pointer rounded-xl border-slate-200 shadow-sm hover:bg-slate-50" asChild>
                       <span><FileText className="h-4 w-4 mr-2" />Browse Files</span>
                     </Button>
                   </label>
-                  <p className="text-[10px] text-muted-foreground/60 mt-4 font-mono">
+                  <p className="text-[10px] text-slate-400 mt-4 font-mono">
                     Expected columns: Timestamp, BP Sys, BP Dia, SpO2, Pulse, Resp Rate, ...
                   </p>
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         )}
 
         {/* ─── Configure Phase ─── */}
         {phase === "configure" && csvData.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+          >
             {/* CSV Summary */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-cyan-400" /> Recording Summary
+            <Card className="bg-white border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl">
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <CardTitle className="text-sm flex items-center gap-2 text-slate-900">
+                  <FileText className="h-4 w-4 text-blue-600" /> Recording Summary
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 pt-4">
                 <div className="text-xs space-y-1.5">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">File</span>
-                    <span className="font-mono text-cyan-400 truncate max-w-[160px]">{fileName}</span>
+                    <span className="text-slate-500">File</span>
+                    <span className="font-mono text-slate-700 truncate max-w-[160px]">{fileName}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Data Points</span>
-                    <span className="font-mono">{csvData.length.toLocaleString()}</span>
+                    <span className="text-slate-500">Data Points</span>
+                    <span className="font-mono text-slate-900">{csvData.length.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Duration</span>
-                    <span className="font-mono">~{formatTime(csvData.length)}</span>
+                    <span className="text-slate-500">Duration</span>
+                    <span className="font-mono text-slate-900">~{formatTime(csvData.length)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Start</span>
-                    <span className="font-mono text-[10px]">{csvData[0]?.timestamp.split("T")[1]?.substring(0, 8)}</span>
+                    <span className="text-slate-500">Start</span>
+                    <span className="font-mono text-[10px] text-slate-900">{csvData[0]?.timestamp.split("T")[1]?.substring(0, 8)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">End</span>
-                    <span className="font-mono text-[10px]">{csvData[csvData.length - 1]?.timestamp.split("T")[1]?.substring(0, 8)}</span>
+                    <span className="text-slate-500">End</span>
+                    <span className="font-mono text-[10px] text-slate-900">{csvData[csvData.length - 1]?.timestamp.split("T")[1]?.substring(0, 8)}</span>
                   </div>
                 </div>
                 {(missingStats.spo2 > 0 || missingStats.pulse > 0) && (
-                  <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[10px]">
-                    <div className="flex items-center gap-1 text-amber-400 font-medium mb-1">
+                  <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-[10px]">
+                    <div className="flex items-center gap-1 text-amber-700 font-medium mb-1">
                       <AlertCircle className="h-3 w-3" /> Missing Values (auto-filled)
                     </div>
-                    {missingStats.spo2 > 0 && <div className="text-muted-foreground">SpO2: {missingStats.spo2} rows</div>}
-                    {missingStats.pulse > 0 && <div className="text-muted-foreground">Pulse: {missingStats.pulse} rows</div>}
+                    {missingStats.spo2 > 0 && <div className="text-slate-600">SpO2: {missingStats.spo2} rows</div>}
+                    {missingStats.pulse > 0 && <div className="text-slate-600">Pulse: {missingStats.pulse} rows</div>}
                   </div>
                 )}
                 {/* Data preview */}
                 <div className="text-[10px] font-mono">
-                  <div className="text-muted-foreground mb-1">First 5 rows:</div>
+                  <div className="text-slate-500 mb-1">First 5 rows:</div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="text-muted-foreground/60">
+                        <tr className="text-slate-400">
                           <th className="pr-2 text-left">#</th>
                           <th className="pr-2 text-right">BP</th>
                           <th className="pr-2 text-right">SpO2</th>
@@ -526,16 +546,16 @@ export default function SessionPlayback() {
                       </thead>
                       <tbody>
                         {csvData.slice(0, 5).map((row, i) => (
-                          <tr key={i} className="border-t border-white/5">
-                            <td className="pr-2 text-muted-foreground">{i + 1}</td>
-                            <td className="pr-2 text-right">{row.bp_sys}/{row.bp_dia}</td>
-                            <td className={`pr-2 text-right ${row.spo2 === 0 ? "text-amber-400" : ""}`}>
+                          <tr key={i} className="border-t border-slate-100">
+                            <td className="pr-2 text-slate-400">{i + 1}</td>
+                            <td className="pr-2 text-right text-slate-900">{row.bp_sys}/{row.bp_dia}</td>
+                            <td className={`pr-2 text-right ${row.spo2 === 0 ? "text-amber-600" : "text-slate-900"}`}>
                               {row.spo2 === 0 ? "—" : row.spo2}
                             </td>
-                            <td className={`pr-2 text-right ${row.pulse === 0 ? "text-amber-400" : ""}`}>
+                            <td className={`pr-2 text-right ${row.pulse === 0 ? "text-amber-600" : "text-slate-900"}`}>
                               {row.pulse === 0 ? "—" : row.pulse}
                             </td>
-                            <td className="pr-2 text-right">{row.resp_rate}</td>
+                            <td className="pr-2 text-right text-slate-900">{row.resp_rate}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -546,16 +566,16 @@ export default function SessionPlayback() {
             </Card>
 
             {/* Constant Vitals Config */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Thermometer className="h-4 w-4 text-purple-400" /> Constant Vitals
+            <Card className="bg-white border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl">
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <CardTitle className="text-sm flex items-center gap-2 text-slate-900">
+                  <Thermometer className="h-4 w-4 text-purple-600" /> Constant Vitals
                 </CardTitle>
-                <CardDescription className="text-[10px]">
+                <CardDescription className="text-[10px] text-slate-500">
                   These values stay fixed during playback (no sensor data for these)
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { key: "temperature", label: "Temperature (°C)", min: 35, max: 41, step: 0.1 },
@@ -567,22 +587,22 @@ export default function SessionPlayback() {
                     { key: "age", label: "Age (years)", min: 18, max: 100, step: 1 },
                   ].map(({ key, label, min, max, step }) => (
                     <div key={key} className="space-y-1">
-                      <Label className="text-[10px] text-muted-foreground">{label}</Label>
+                      <Label className="text-[10px] text-slate-500">{label}</Label>
                       <Input
                         type="number"
                         min={min} max={max} step={step}
                         value={constants[key as keyof ConstantVitals]}
                         onChange={(e) => setConstants(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
-                        className="h-8 text-xs font-mono"
+                        className="h-8 text-xs font-mono rounded-lg border-slate-200 bg-white"
                       />
                     </div>
                   ))}
                   <div className="space-y-1">
-                    <Label className="text-[10px] text-muted-foreground">Gender</Label>
+                    <Label className="text-[10px] text-slate-500">Gender</Label>
                     <select
                       value={constants.gender}
                       onChange={(e) => setConstants(prev => ({ ...prev, gender: e.target.value }))}
-                      className="w-full h-8 rounded-md border border-input bg-background px-3 text-xs font-mono"
+                      className="w-full h-8 rounded-lg border border-slate-200 bg-white px-3 text-xs font-mono text-slate-900"
                     >
                       <option value="M">Male</option>
                       <option value="F">Female</option>
@@ -593,20 +613,20 @@ export default function SessionPlayback() {
             </Card>
 
             {/* Playback Settings */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Play className="h-4 w-4 text-emerald-400" /> Playback Settings
+            <Card className="bg-white border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl">
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <CardTitle className="text-sm flex items-center gap-2 text-slate-900">
+                  <Play className="h-4 w-4 text-emerald-600" /> Playback Settings
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label className="text-[10px] text-muted-foreground">Speed: {speed}× real-time</Label>
+                  <Label className="text-[10px] text-slate-500">Speed: {speed}× real-time</Label>
                   <div className="flex gap-2">
                     {[1, 2, 5, 10, 20].map((s) => (
                       <Button
                         key={s} size="sm" variant={speed === s ? "default" : "outline"}
-                        className="text-xs flex-1 h-7"
+                        className={`text-xs flex-1 h-7 rounded-lg ${speed === s ? "bg-slate-900 hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                         onClick={() => setSpeed(s)}
                       >
                         {s}×
@@ -615,14 +635,14 @@ export default function SessionPlayback() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] text-muted-foreground">
+                  <Label className="text-[10px] text-slate-500">
                     Predict every {predictionInterval} rows (~{predictionInterval}s of recording)
                   </Label>
                   <div className="flex gap-2">
                     {[15, 30, 60, 100].map((n) => (
                       <Button
                         key={n} size="sm" variant={predictionInterval === n ? "default" : "outline"}
-                        className="text-xs flex-1 h-7"
+                        className={`text-xs flex-1 h-7 rounded-lg ${predictionInterval === n ? "bg-slate-900 hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                         onClick={() => setPredictionInterval(n)}
                       >
                         {n}
@@ -631,12 +651,12 @@ export default function SessionPlayback() {
                   </div>
                 </div>
                 <div className="pt-2 space-y-2">
-                  <Button onClick={handlePlay} className="w-full gap-2" size="lg">
+                  <Button onClick={handlePlay} className="w-full gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 shadow-lg shadow-slate-900/10" size="lg">
                     <Play className="h-5 w-5" />
                     Start Playback
                   </Button>
                   <Button
-                    variant="outline" className="w-full gap-2"
+                    variant="outline" className="w-full gap-2 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm"
                     onClick={() => {
                       setPhase("upload");
                       setCsvData([]);
@@ -650,53 +670,58 @@ export default function SessionPlayback() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         )}
 
         {/* ─── Playback / Paused / Finished ─── */}
         {(phase === "playing" || phase === "paused" || phase === "finished") && effectiveRow && (
-          <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05, duration: 0.4 }}
+            className="space-y-4"
+          >
             {/* Transport Controls */}
-            <Card className="border-cyan-500/20 bg-gradient-to-r from-cyan-500/5 to-transparent">
+            <Card className="border-slate-200 bg-white shadow-xl shadow-slate-200/50 rounded-2xl">
               <CardContent className="p-3">
                 <div className="flex items-center gap-3">
                   {/* Play/Pause/Stop */}
                   <div className="flex items-center gap-1">
                     {phase === "playing" ? (
-                      <Button size="icon" variant="ghost" onClick={handlePause} className="h-8 w-8">
-                        <Pause className="h-4 w-4" />
+                      <Button size="icon" variant="ghost" onClick={handlePause} className="h-8 w-8 hover:bg-slate-100">
+                        <Pause className="h-4 w-4 text-slate-700" />
                       </Button>
                     ) : (
-                      <Button size="icon" variant="ghost" onClick={handlePlay} className="h-8 w-8"
+                      <Button size="icon" variant="ghost" onClick={handlePlay} className="h-8 w-8 hover:bg-slate-100"
                         disabled={phase === "finished"}>
-                        <Play className="h-4 w-4" />
+                        <Play className="h-4 w-4 text-slate-700" />
                       </Button>
                     )}
-                    <Button size="icon" variant="ghost" onClick={handleStop} className="h-8 w-8">
-                      <Square className="h-4 w-4" />
+                    <Button size="icon" variant="ghost" onClick={handleStop} className="h-8 w-8 hover:bg-slate-100">
+                      <Square className="h-4 w-4 text-slate-700" />
                     </Button>
                   </div>
 
                   {/* Status badge */}
                   <Badge variant="outline" className={`text-[10px] ${
-                    phase === "playing" ? "border-emerald-500/50 text-emerald-400" :
-                    phase === "paused" ? "border-amber-500/50 text-amber-400" :
-                    "border-muted-foreground/50 text-muted-foreground"
+                    phase === "playing" ? "border-emerald-200 text-emerald-700 bg-emerald-50" :
+                    phase === "paused" ? "border-amber-200 text-amber-700 bg-amber-50" :
+                    "border-slate-200 text-slate-500 bg-slate-50"
                   }`}>
-                    {phase === "playing" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse inline-block" />}
+                    {phase === "playing" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse inline-block" />}
                     {phase.toUpperCase()}
                   </Badge>
 
                   {/* Speed selector */}
-                  <div className="flex items-center gap-1 border-l border-white/10 pl-3">
+                  <div className="flex items-center gap-1 border-l border-slate-200 pl-3">
                     {[1, 2, 5, 10, 20].map(s => (
                       <button
                         key={s}
                         onClick={() => setSpeed(s)}
                         className={`px-1.5 py-0.5 text-[10px] font-mono rounded transition-colors ${
                           speed === s
-                            ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30"
-                            : "text-muted-foreground hover:text-foreground"
+                            ? "bg-slate-900 text-white shadow-sm"
+                            : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
                         }`}
                       >
                         {s}×
@@ -706,7 +731,7 @@ export default function SessionPlayback() {
 
                   {/* Progress & Time */}
                   <div className="flex-1 flex items-center gap-3">
-                    <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
+                    <span className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
                       {formatTime(currentIndex)} / {formatTime(csvData.length)}
                     </span>
                     <Slider
@@ -716,13 +741,13 @@ export default function SessionPlayback() {
                       step={0.1}
                       className="flex-1"
                     />
-                    <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
+                    <span className="text-[10px] font-mono text-slate-500 whitespace-nowrap">
                       Row {currentIndex + 1}/{csvData.length}
                     </span>
                   </div>
 
                   {/* Prediction count */}
-                  <Badge variant="outline" className="text-[10px] border-purple-500/40 text-purple-400">
+                  <Badge variant="outline" className="text-[10px] border-purple-200 text-purple-700 bg-purple-50">
                     <Zap className="h-3 w-3 mr-1" />
                     {predictions.length} predictions
                   </Badge>
@@ -737,55 +762,55 @@ export default function SessionPlayback() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   <VitalGauge
                     icon={Heart} label="Heart Rate" value={effectiveRow.pulse}
-                    unit="bpm" color="text-rose-400" min={30} max={180}
+                    unit="bpm" color="text-rose-600" min={30} max={180}
                     warning={100} critical={130}
                   />
                   <VitalGauge
                     icon={Activity} label="Blood Pressure"
                     value={effectiveRow.bp_sys}
-                    unit={`/${effectiveRow.bp_dia}`} color="text-blue-400"
+                    unit={`/${effectiveRow.bp_dia}`} color="text-blue-600"
                     min={60} max={200} warning={160} critical={180}
                   />
                   <VitalGauge
                     icon={Droplets} label="SpO₂" value={effectiveRow.spo2}
-                    unit="%" color="text-cyan-400" min={70} max={100}
+                    unit="%" color="text-sky-600" min={70} max={100}
                     warning={93} critical={88}
                   />
                   <VitalGauge
                     icon={Wind} label="Resp Rate" value={effectiveRow.resp_rate}
-                    unit="/min" color="text-emerald-400" min={6} max={40}
+                    unit="/min" color="text-emerald-600" min={6} max={40}
                     warning={24} critical={30}
                   />
                 </div>
 
                 {/* Extra info bar */}
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="text-[10px] font-mono">
+                  <Badge variant="outline" className="text-[10px] font-mono border-slate-200 text-slate-600 bg-white">
                     <Clock className="h-3 w-3 mr-1" />
                     {effectiveRow.timestamp.split("T")[1]?.substring(0, 8)}
                   </Badge>
-                  <Badge variant="outline" className="text-[10px] font-mono">
+                  <Badge variant="outline" className="text-[10px] font-mono border-slate-200 text-slate-600 bg-white">
                     MAP: {Math.round((effectiveRow.bp_sys + 2 * effectiveRow.bp_dia) / 3)}
                   </Badge>
-                  <Badge variant="outline" className={`text-[10px] font-mono ${
-                    effectiveRow.arrhythmia !== "Sinus rhythm" ? "border-amber-500/50 text-amber-400" : ""
+                  <Badge variant="outline" className={`text-[10px] font-mono bg-white ${
+                    effectiveRow.arrhythmia !== "Sinus rhythm" ? "border-amber-200 text-amber-700" : "border-slate-200 text-slate-600"
                   }`}>
                     {effectiveRow.arrhythmia}
                   </Badge>
-                  <Badge variant="outline" className={`text-[10px] font-mono ${
-                    effectiveRow.signal_quality === "Poor" ? "border-red-500/50 text-red-400" :
-                    effectiveRow.signal_quality === "Fair" ? "border-amber-500/50 text-amber-400" :
-                    effectiveRow.signal_quality === "Good" ? "border-emerald-500/50 text-emerald-400" : ""
+                  <Badge variant="outline" className={`text-[10px] font-mono bg-white ${
+                    effectiveRow.signal_quality === "Poor" ? "border-red-200 text-red-700" :
+                    effectiveRow.signal_quality === "Fair" ? "border-amber-200 text-amber-700" :
+                    effectiveRow.signal_quality === "Good" ? "border-emerald-200 text-emerald-700" : "border-slate-200 text-slate-600"
                   }`}>
                     Signal: {effectiveRow.signal_quality}
                   </Badge>
                   {!effectiveRow.finger && (
-                    <Badge variant="outline" className="text-[10px] font-mono border-red-500/50 text-red-400 animate-pulse">
-                      ⚠ NO FINGER
+                    <Badge variant="outline" className="text-[10px] font-mono border-red-200 text-red-700 bg-red-50 animate-pulse">
+                      <AlertTriangle className="h-3 w-3 mr-1" /> NO FINGER
                     </Badge>
                   )}
                   {isPredicting && (
-                    <Badge variant="outline" className="text-[10px] font-mono border-cyan-500/50 text-cyan-400 animate-pulse">
+                    <Badge variant="outline" className="text-[10px] font-mono border-blue-200 text-blue-700 bg-blue-50 animate-pulse">
                       <Activity className="h-3 w-3 mr-1 animate-spin" />
                       Running ML inference...
                     </Badge>
@@ -794,10 +819,10 @@ export default function SessionPlayback() {
 
                 {/* Prediction Timeline Table */}
                 {predictions.length > 0 && (
-                  <Card>
-                    <CardHeader className="pb-2 pt-3 px-4">
-                      <CardTitle className="text-xs flex items-center gap-2">
-                        <TrendingUp className="h-3.5 w-3.5 text-cyan-400" />
+                  <Card className="bg-white border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl">
+                    <CardHeader className="pb-2 pt-3 px-4 border-b border-slate-100 bg-slate-50/50">
+                      <CardTitle className="text-xs flex items-center gap-2 text-slate-900">
+                        <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
                         Prediction Timeline ({predictions.length} assessments)
                       </CardTitle>
                     </CardHeader>
@@ -805,7 +830,7 @@ export default function SessionPlayback() {
                       <div className="overflow-x-auto max-h-48 overflow-y-auto">
                         <table className="w-full text-[10px] font-mono">
                           <thead>
-                            <tr className="text-muted-foreground/60 border-b border-white/5">
+                            <tr className="text-slate-400 border-b border-slate-100">
                               <th className="text-left py-1 pr-2">#</th>
                               <th className="text-left py-1 pr-2">Time</th>
                               <th className="text-right py-1 pr-2">Risk</th>
@@ -817,16 +842,16 @@ export default function SessionPlayback() {
                           </thead>
                           <tbody>
                             {predictions.map((p, i) => (
-                              <tr key={i} className="border-t border-white/5 hover:bg-white/5">
-                                <td className="py-1 pr-2 text-muted-foreground">{i + 1}</td>
-                                <td className="py-1 pr-2">{p.timestamp.split("T")[1]?.substring(0, 8)}</td>
-                                <td className="py-1 pr-2 text-right font-bold">
+                              <tr key={i} className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                                <td className="py-1 pr-2 text-slate-400">{i + 1}</td>
+                                <td className="py-1 pr-2 text-slate-700">{p.timestamp.split("T")[1]?.substring(0, 8)}</td>
+                                <td className="py-1 pr-2 text-right font-bold text-slate-900">
                                   {(p.result.risk_score * 100).toFixed(1)}%
                                 </td>
-                                <td className="py-1 pr-2 text-right text-muted-foreground">
+                                <td className="py-1 pr-2 text-right text-slate-500">
                                   {(p.result.lstm_score * 100).toFixed(1)}%
                                 </td>
-                                <td className="py-1 pr-2 text-right text-muted-foreground">
+                                <td className="py-1 pr-2 text-right text-slate-500">
                                   {(p.result.confidence * 100).toFixed(0)}%
                                 </td>
                                 <td className="py-1 pr-2">
@@ -836,8 +861,8 @@ export default function SessionPlayback() {
                                 </td>
                                 <td className="py-1 text-right">
                                   {p.result.n_active_tripwires > 0
-                                    ? <span className="text-red-400">{p.result.n_active_tripwires}</span>
-                                    : <span className="text-muted-foreground/40">0</span>
+                                    ? <span className="text-red-600 font-semibold">{p.result.n_active_tripwires}</span>
+                                    : <span className="text-slate-300">0</span>
                                   }
                                 </td>
                               </tr>
@@ -853,17 +878,17 @@ export default function SessionPlayback() {
               {/* ─── Right Panel: Latest Prediction + Risk Chart ─── */}
               <div className="space-y-4">
                 {/* Risk Trend Chart */}
-                <Card>
-                  <CardHeader className="pb-2 pt-3 px-4">
-                    <CardTitle className="text-xs flex items-center gap-2">
-                      <TrendingUp className="h-3.5 w-3.5 text-cyan-400" /> Risk Trend
+                <Card className="bg-white border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl">
+                  <CardHeader className="pb-2 pt-3 px-4 border-b border-slate-100 bg-slate-50/50">
+                    <CardTitle className="text-xs flex items-center gap-2 text-slate-900">
+                      <TrendingUp className="h-3.5 w-3.5 text-blue-600" /> Risk Trend
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="px-4 pb-3">
                     {predictions.length > 0 ? (
                       <MiniRiskChart predictions={predictions} />
                     ) : (
-                      <div className="text-center py-4 text-[10px] text-muted-foreground">
+                      <div className="text-center py-4 text-[10px] text-slate-400">
                         Waiting for first prediction...
                       </div>
                     )}
@@ -871,23 +896,23 @@ export default function SessionPlayback() {
                 </Card>
 
                 {/* Latest Prediction */}
-                <Card className={latestPrediction ? "border-l-2 " + (
+                <Card className={`bg-white border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl ${latestPrediction ? "border-l-2 " + (
                   latestPrediction.alert_level === "CRITICAL" || latestPrediction.alert_level === "FAST-TRACK"
                     ? "border-l-red-500"
                     : latestPrediction.alert_level === "AMBER"
                     ? "border-l-amber-500"
                     : "border-l-emerald-500"
-                ) : ""}>
-                  <CardHeader className="pb-2 pt-3 px-4">
-                    <CardTitle className="text-xs flex items-center gap-2">
-                      <Shield className="h-3.5 w-3.5 text-primary" /> Latest Assessment
+                ) : ""}`}>
+                  <CardHeader className="pb-2 pt-3 px-4 border-b border-slate-100 bg-slate-50/50">
+                    <CardTitle className="text-xs flex items-center gap-2 text-slate-900">
+                      <Shield className="h-3.5 w-3.5 text-slate-700" /> Latest Assessment
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="px-4 pb-3">
                     {latestPrediction ? (
                       <div className="space-y-3">
                         {/* Alert level */}
-                        <div className={`p-3 rounded-lg border bg-gradient-to-r ${getAlertColor(latestPrediction.alert_level)}`}>
+                        <div className={`p-3 rounded-xl border bg-gradient-to-r ${getAlertColor(latestPrediction.alert_level)}`}>
                           <div className="flex items-center justify-between">
                             <span className="text-lg font-bold">{latestPrediction.alert_level}</span>
                             {latestPrediction.fast_tracked && (
@@ -899,8 +924,8 @@ export default function SessionPlayback() {
                         {/* Risk Score */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs">
-                            <span className="text-muted-foreground">Risk Score</span>
-                            <span className="font-mono font-bold">{(latestPrediction.risk_score * 100).toFixed(1)}%</span>
+                            <span className="text-slate-500">Risk Score</span>
+                            <span className="font-mono font-bold text-slate-900">{(latestPrediction.risk_score * 100).toFixed(1)}%</span>
                           </div>
                           <Progress value={latestPrediction.risk_score * 100} className="h-2" />
                         </div>
@@ -908,28 +933,28 @@ export default function SessionPlayback() {
                         {/* Confidence */}
                         <div className="space-y-1">
                           <div className="flex justify-between text-xs">
-                            <span className="text-muted-foreground">Confidence</span>
-                            <span className="font-mono">{(latestPrediction.confidence * 100).toFixed(1)}%</span>
+                            <span className="text-slate-500">Confidence</span>
+                            <span className="font-mono text-slate-700">{(latestPrediction.confidence * 100).toFixed(1)}%</span>
                           </div>
                           <Progress value={latestPrediction.confidence * 100} className="h-1.5" />
                         </div>
 
                         {/* Conformal Interval */}
-                        <div className="text-[10px] text-muted-foreground">
+                        <div className="text-[10px] text-slate-500">
                           90% interval: [{(latestPrediction.conformal_interval[0] * 100).toFixed(1)}%, {(latestPrediction.conformal_interval[1] * 100).toFixed(1)}%]
                         </div>
 
                         {/* Active Tripwires */}
                         {latestPrediction.n_active_tripwires > 0 && (
                           <div className="space-y-1">
-                            <div className="flex items-center gap-1 text-[10px] font-medium text-red-400">
+                            <div className="flex items-center gap-1 text-[10px] font-medium text-red-600">
                               <AlertCircle className="h-3 w-3" />
                               {latestPrediction.n_active_tripwires} Tripwire{latestPrediction.n_active_tripwires > 1 ? "s" : ""}
                             </div>
                             {latestPrediction.tripwires.filter(t => t.triggered).map((tw, i) => (
-                              <div key={i} className="text-[9px] bg-red-500/10 p-1.5 rounded border border-red-500/20">
-                                <span className="font-mono text-red-400">{tw.name}</span>
-                                <span className="text-muted-foreground ml-1">— {tw.reason}</span>
+                              <div key={i} className="text-[9px] bg-red-50 p-1.5 rounded-lg border border-red-200">
+                                <span className="font-mono text-red-700">{tw.name}</span>
+                                <span className="text-slate-500 ml-1">— {tw.reason}</span>
                               </div>
                             ))}
                           </div>
@@ -937,18 +962,18 @@ export default function SessionPlayback() {
 
                         {/* Reasoning */}
                         <div className="text-[10px]">
-                          <div className="font-medium text-muted-foreground mb-0.5">Clinical Reasoning</div>
-                          <div className="text-muted-foreground/80 leading-relaxed">{latestPrediction.reasoning}</div>
+                          <div className="font-medium text-slate-600 mb-0.5">Clinical Reasoning</div>
+                          <div className="text-slate-500 leading-relaxed">{latestPrediction.reasoning}</div>
                         </div>
 
                         {/* Actions */}
                         {latestPrediction.actions.length > 0 && (
                           <div className="text-[10px]">
-                            <div className="font-medium text-muted-foreground mb-0.5">Actions</div>
+                            <div className="font-medium text-slate-600 mb-0.5">Actions</div>
                             <ul className="space-y-0.5">
                               {latestPrediction.actions.map((a, i) => (
-                                <li key={i} className="flex items-start gap-1 text-muted-foreground/80">
-                                  <ChevronRight className="h-3 w-3 mt-0.5 shrink-0 text-cyan-400" />
+                                <li key={i} className="flex items-start gap-1 text-slate-500">
+                                  <ChevronRight className="h-3 w-3 mt-0.5 shrink-0 text-blue-500" />
                                   {a}
                                 </li>
                               ))}
@@ -958,21 +983,21 @@ export default function SessionPlayback() {
 
                         {/* Clinical Narrative */}
                         {latestPrediction.clinical_narrative && (
-                          <div className="text-[10px] p-2 rounded bg-purple-500/5 border border-purple-500/20">
-                            <div className="font-medium text-purple-400 mb-0.5">AI Narrative</div>
-                            <div className="text-muted-foreground/80 leading-relaxed whitespace-pre-wrap">
+                          <div className="text-[10px] p-2 rounded-lg bg-purple-50 border border-purple-200">
+                            <div className="font-medium text-purple-700 mb-0.5">AI Narrative</div>
+                            <div className="text-slate-600 leading-relaxed whitespace-pre-wrap">
                               {latestPrediction.clinical_narrative}
                             </div>
                           </div>
                         )}
 
-                        <div className="text-[9px] text-muted-foreground/50 font-mono border-t border-white/5 pt-1">
+                        <div className="text-[9px] text-slate-400 font-mono border-t border-slate-100 pt-1">
                           Backend: {latestPrediction.backend}
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-6 text-muted-foreground/50">
-                        <Shield className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                      <div className="text-center py-6 text-slate-400">
+                        <Shield className="h-8 w-8 mx-auto mb-2 opacity-30" />
                         <p className="text-[10px]">Awaiting first prediction...</p>
                       </div>
                     )}
@@ -980,22 +1005,22 @@ export default function SessionPlayback() {
                 </Card>
 
                 {/* Constant vitals summary */}
-                <Card>
-                  <CardHeader className="pb-2 pt-3 px-4">
-                    <CardTitle className="text-xs text-muted-foreground flex items-center gap-2">
+                <Card className="bg-white border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl">
+                  <CardHeader className="pb-2 pt-3 px-4 border-b border-slate-100 bg-slate-50/50">
+                    <CardTitle className="text-xs text-slate-500 flex items-center gap-2">
                       <Thermometer className="h-3.5 w-3.5" /> Fixed Vitals
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="px-4 pb-3">
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px] font-mono">
-                      <div className="flex justify-between"><span className="text-muted-foreground">Temp</span><span>{constants.temperature}°C</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">GCS</span><span>{constants.gcs_total}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Lactate</span><span>{constants.lactate}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">WBC</span><span>{constants.wbc}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Creatinine</span><span>{constants.creatinine}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Platelets</span><span>{constants.platelets}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Age</span><span>{constants.age}</span></div>
-                      <div className="flex justify-between"><span className="text-muted-foreground">Gender</span><span>{constants.gender}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Temp</span><span className="text-slate-900">{constants.temperature}°C</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">GCS</span><span className="text-slate-900">{constants.gcs_total}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Lactate</span><span className="text-slate-900">{constants.lactate}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">WBC</span><span className="text-slate-900">{constants.wbc}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Creatinine</span><span className="text-slate-900">{constants.creatinine}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Platelets</span><span className="text-slate-900">{constants.platelets}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Age</span><span className="text-slate-900">{constants.age}</span></div>
+                      <div className="flex justify-between"><span className="text-slate-500">Gender</span><span className="text-slate-900">{constants.gender}</span></div>
                     </div>
                   </CardContent>
                 </Card>
@@ -1004,36 +1029,42 @@ export default function SessionPlayback() {
 
             {/* Finished banner */}
             {phase === "finished" && (
-              <Card className="border-cyan-500/30 bg-gradient-to-r from-cyan-500/10 to-purple-500/10">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-cyan-500/20">
-                      <Activity className="h-5 w-5 text-cyan-400" />
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Card className="border-slate-200 bg-white shadow-xl shadow-slate-200/50 rounded-2xl">
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200">
+                        <Activity className="h-5 w-5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-sm text-slate-900">Session Complete</h3>
+                        <p className="text-xs text-slate-500">
+                          {csvData.length} data points processed · {predictions.length} predictions made
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-sm">Session Complete</h3>
-                      <p className="text-xs text-muted-foreground">
-                        {csvData.length} data points processed • {predictions.length} predictions made
-                      </p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={handleStop} className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50">
+                        Replay
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setPhase("upload");
+                        setCsvData([]);
+                        setPredictions([]);
+                        setLatestPrediction(null);
+                      }} className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50">
+                        New Session
+                      </Button>
                     </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={handleStop}>
-                      Replay
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => {
-                      setPhase("upload");
-                      setCsvData([]);
-                      setPredictions([]);
-                      setLatestPrediction(null);
-                    }}>
-                      New Session
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         )}
       </main>
     </div>
