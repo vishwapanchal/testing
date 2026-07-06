@@ -129,7 +129,7 @@ export default function Landing() {
                 {user ? "Enter Workspace" : "Deploy Sentinel"} <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
               <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-full bg-white/50 backdrop-blur-md text-slate-700 border-slate-200 hover:bg-white hover:text-slate-900 text-base px-8 py-7 transition-all shadow-sm font-semibold" onClick={() => navigate("/demo")}>
-                View Architecture
+                Watch Demo
               </Button>
             </motion.div>
           </div>
