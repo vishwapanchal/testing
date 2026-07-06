@@ -5,9 +5,9 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   predict, SCENARIOS,
   type VitalInputs, type PredictionResult, type AlertLevel,
@@ -20,25 +20,50 @@ import {
 
 /* ── helpers ───────────────────────────────────────────────── */
 const TIER_COLORS: Record<AlertLevel, string> = {
-  WATCH: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
-  AMBER: "bg-amber-500/20 text-amber-400 border-amber-500/40",
-  CRITICAL: "bg-red-500/20 text-red-400 border-red-500/40",
-  "FAST-TRACK": "bg-purple-500/20 text-purple-400 border-purple-500/40",
+  WATCH: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  AMBER: "bg-amber-100 text-amber-800 border-amber-200",
+  CRITICAL: "bg-red-100 text-red-800 border-red-200",
+  "FAST-TRACK": "bg-purple-100 text-purple-800 border-purple-200",
 };
 const TIER_BG: Record<AlertLevel, string> = {
-  WATCH: "border-emerald-500/30 bg-emerald-950/20",
-  AMBER: "border-amber-500/30 bg-amber-950/20",
-  CRITICAL: "border-red-500/40 bg-red-950/30 animate-pulse",
-  "FAST-TRACK": "border-purple-500/30 bg-purple-950/20",
+  WATCH: "border-emerald-200 bg-emerald-50",
+  AMBER: "border-amber-200 bg-amber-50",
+  CRITICAL: "border-red-200 bg-red-50 shadow-[0_0_15px_rgba(239,68,68,0.2)]",
+  "FAST-TRACK": "border-purple-200 bg-purple-50",
 };
 
 function vitalStatus(val: number, lo: number, hi: number) {
-  if (val < lo) return { label: "LOW", cls: "text-blue-400" };
-  if (val > hi) return { label: "HIGH", cls: "text-red-400" };
-  return { label: "NORMAL", cls: "text-emerald-400" };
+  if (val < lo) return { label: "LOW", cls: "text-blue-600 font-semibold" };
+  if (val > hi) return { label: "HIGH", cls: "text-red-600 font-semibold" };
+  return { label: "NORMAL", cls: "text-emerald-600 font-medium" };
 }
 
 type DemoMode = "instant" | "manual" | "simulated";
+
+/* ── motion variants ───────────────────────────────────────── */
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+};
+const fadeInUp = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
+
+/* ── premium card wrapper ──────────────────────────────────── */
+function PremiumCard({ children, className, ...props }: React.ComponentProps<typeof Card>) {
+  return (
+    <Card 
+      className={cn(
+        "bg-white border border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/60",
+        className
+      )} 
+      {...props}
+    >
+      {children}
+    </Card>
+  );
+}
 
 /* ── main page ─────────────────────────────────────────────── */
 export default function DemoSimulator() {
@@ -51,6 +76,7 @@ export default function DemoSimulator() {
   const [simStep, setSimStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  
   // Phase 2: CXR upload state
   const [cxrFile, setCxrFile] = useState<File | null>(null);
   const [cxrPreview, setCxrPreview] = useState<string | null>(null);
@@ -110,39 +136,41 @@ export default function DemoSimulator() {
   const gaugeRadius = 45;
   const gaugeCirc = Math.PI * gaugeRadius;
   const gaugeOffset = result ? gaugeCirc - (result.risk_score * gaugeCirc) : gaugeCirc;
-  const gaugeColor = !result ? "#334155" :
+  const gaugeColor = !result ? "#e2e8f0" :
     result.alert_level === "CRITICAL" ? "#ef4444" :
-    result.alert_level === "AMBER" ? "#f59e0b" : "#22c55e";
+    result.alert_level === "AMBER" ? "#f59e0b" : "#10b981";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-100 font-sans">
       <GlobalNav />
 
       {/* Header */}
-      <div className="border-b border-border px-4 sm:px-6 py-3">
-        <div className="max-w-[1600px] mx-auto flex items-center justify-between flex-wrap gap-2">
+      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 shadow-sm z-10 relative">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <Shield className="h-5 w-5 text-primary" />
-            <h1 className="text-sm font-semibold">Demo Simulator</h1>
-            <Badge variant="outline" className="text-[10px] font-mono">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+              <Shield className="h-5 w-5" />
+            </div>
+            <h1 className="text-lg font-bold text-slate-900 tracking-tight">Demo Simulator</h1>
+            <Badge variant="outline" className="text-[10px] font-mono bg-slate-100 text-slate-600 border-slate-200 ml-2 shadow-sm">
               {result ? (result.backend === "client_fallback" ? "fallback" : result.backend) : "ensemble"}
             </Badge>
-            <Badge variant="outline" className="text-[10px] font-mono text-primary border-primary/40">
+            <Badge variant="outline" className="text-[10px] font-mono bg-blue-50 text-blue-700 border-blue-200 shadow-sm">
               {mode === "instant" ? "⚡ Instant" : mode === "manual" ? "🖱️ Manual" : "⏱️ 15-min Cycle"}
             </Badge>
           </div>
           <div className="flex items-center gap-4">
             {/* Mode selector */}
-            <div className="flex items-center gap-2">
-              <Label className="text-[10px] font-mono text-muted-foreground">Mode:</Label>
+            <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-lg border border-slate-200 shadow-inner">
+              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider pl-2">Mode</Label>
               <Select value={mode} onValueChange={(v) => { setMode(v as DemoMode); setSimRunning(false); }}>
-                <SelectTrigger className="w-[160px] h-8 text-xs">
+                <SelectTrigger className="w-[170px] h-8 text-xs bg-white border-slate-200 shadow-sm font-medium rounded-md">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="instant">⚡ Demo Instant</SelectItem>
-                  <SelectItem value="manual">🖱️ Manual (click)</SelectItem>
-                  <SelectItem value="simulated">⏱️ 15-min Cycle</SelectItem>
+                <SelectContent className="rounded-xl shadow-xl border-slate-200">
+                  <SelectItem value="instant" className="text-xs focus:bg-slate-50">⚡ Demo Instant</SelectItem>
+                  <SelectItem value="manual" className="text-xs focus:bg-slate-50">🖱️ Manual (click)</SelectItem>
+                  <SelectItem value="simulated" className="text-xs focus:bg-slate-50">⏱️ 15-min Cycle</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -150,72 +178,80 @@ export default function DemoSimulator() {
         </div>
       </div>
 
-      <main className="p-4 sm:p-6 max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-
+      <main className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+        <motion.div 
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8"
+        >
           {/* ── LEFT: Controls ─────────────────────────── */}
-          <div className="lg:col-span-3 space-y-4">
+          <motion.div variants={fadeInUp} className="lg:col-span-3 space-y-5">
             {/* Scenario */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+            <PremiumCard>
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
                   Patient Scenario
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="pt-4 space-y-3">
                 <Select value={scenario} onValueChange={setScenario}>
-                  <SelectTrigger className="h-9 text-xs">
+                  <SelectTrigger className="h-10 text-sm font-medium bg-white border-slate-200 rounded-xl shadow-sm hover:bg-slate-50 transition-colors">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="rounded-xl shadow-xl border-slate-200">
                     {Object.entries(SCENARIOS).map(([k, v]) => (
-                      <SelectItem key={k} value={k} className="text-xs">
+                      <SelectItem key={k} value={k} className="text-sm cursor-pointer focus:bg-slate-50 py-2">
                         {v.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-slate-500 leading-relaxed font-medium">
                   {SCENARIOS[scenario]?.description}
                 </p>
               </CardContent>
-            </Card>
+            </PremiumCard>
 
             {/* Phase 2: Demographics */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <User className="h-3.5 w-3.5" /> Patient Demographics
+            <PremiumCard>
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  <User className="h-3.5 w-3.5 text-blue-500" /> Patient Demographics
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <VitalSlider icon={<User className="h-3 w-3" />} label="Age" unit="yrs" value={vitals.age} min={18} max={100} step={1} onChange={(v) => updateVital("age", v)} />
-                <div>
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-1.5">
-                    <User className="h-3 w-3" /> Gender
+              <CardContent className="pt-4 space-y-4">
+                <VitalSlider icon={<User className="h-3.5 w-3.5 text-slate-400" />} label="Age" unit="yrs" value={vitals.age} min={18} max={100} step={1} onChange={(v) => updateVital("age", v)} />
+                <div className="pt-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-2">
+                    <User className="h-3.5 w-3.5" /> Gender
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant={vitals.gender === "M" ? "default" : "outline"}
+                    <Button 
+                      size="sm" 
+                      variant={vitals.gender === "M" ? "default" : "outline"}
                       onClick={() => setVitals(prev => ({ ...prev, gender: "M" as const }))}
-                      className="text-xs px-4 h-7"
+                      className={cn("text-xs px-5 h-8 rounded-full font-medium transition-all", vitals.gender === "M" ? "bg-slate-900 hover:bg-slate-800 shadow-md" : "border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm")}
                     >Male</Button>
-                    <Button size="sm" variant={vitals.gender === "F" ? "default" : "outline"}
+                    <Button 
+                      size="sm" 
+                      variant={vitals.gender === "F" ? "default" : "outline"}
                       onClick={() => setVitals(prev => ({ ...prev, gender: "F" as const }))}
-                      className="text-xs px-4 h-7"
+                      className={cn("text-xs px-5 h-8 rounded-full font-medium transition-all", vitals.gender === "F" ? "bg-slate-900 hover:bg-slate-800 shadow-md" : "border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm")}
                     >Female</Button>
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </PremiumCard>
 
             {/* Phase 2: CXR Upload */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <Upload className="h-3.5 w-3.5" /> Chest X-Ray
+            <PremiumCard>
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  <Upload className="h-3.5 w-3.5 text-indigo-500" /> Chest X-Ray
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="pt-4 space-y-3">
                 <input
                   type="file"
                   accept="image/jpeg,image/png"
@@ -235,351 +271,438 @@ export default function DemoSimulator() {
                     }
                   }}
                 />
-                <Button size="sm" variant="outline" className="w-full text-xs h-8"
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full text-xs h-9 rounded-xl border-dashed border-2 border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 transition-all font-medium shadow-sm"
                   onClick={() => document.getElementById("cxr-upload")?.click()}
                 >
-                  <Upload className="h-3 w-3 mr-1.5" />
+                  <Upload className="h-3.5 w-3.5 mr-2" />
                   {cxrFile ? "Change X-Ray" : "Upload CXR Image"}
                 </Button>
-                {cxrFile && (
-                  <div className="space-y-1">
-                    <p className="text-[10px] text-emerald-400 font-mono">✓ {cxrFile.name}</p>
-                    {cxrPreview && (
-                      <img src={cxrPreview} alt="CXR Preview" className="w-full h-28 object-cover rounded border border-slate-700" />
-                    )}
-                    <Button size="sm" variant="ghost" className="text-[10px] text-red-400 h-6 px-2"
-                      onClick={() => {
-                        setCxrFile(null);
-                        setCxrPreview(null);
-                        setVitals(prev => { const { cxr_image_base64, ...rest } = prev; return { ...rest } as typeof prev; });
-                      }}
-                    >Remove</Button>
-                  </div>
-                )}
+                
+                <AnimatePresence>
+                  {cxrFile && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2 overflow-hidden"
+                    >
+                      <p className="text-[11px] text-emerald-600 font-mono font-medium flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {cxrFile.name}
+                      </p>
+                      {cxrPreview && (
+                        <div className="relative group rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                          <img src={cxrPreview} alt="CXR Preview" className="w-full h-32 object-cover" />
+                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
+                            <Button size="sm" variant="destructive" className="h-7 text-xs rounded-full shadow-lg"
+                              onClick={() => {
+                                setCxrFile(null);
+                                setCxrPreview(null);
+                                setVitals(prev => { const { cxr_image_base64, ...rest } = prev; return { ...rest } as typeof prev; });
+                              }}
+                            >Remove</Button>
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
                 {!cxrFile && (
-                  <p className="text-[10px] text-muted-foreground">Upload a chest X-ray JPEG for AI-powered pulmonary analysis</p>
+                  <p className="text-[11px] text-slate-500 font-medium text-center px-2">Upload a chest X-ray JPEG for AI-powered pulmonary analysis</p>
                 )}
               </CardContent>
-            </Card>
+            </PremiumCard>
 
             {/* Vital Sliders */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <Activity className="h-3.5 w-3.5" /> Vital Signs Input
+            <PremiumCard>
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  <Activity className="h-3.5 w-3.5 text-rose-500" /> Vital Signs Input
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <VitalSlider icon={<Heart className="h-3 w-3" />} label="Heart Rate" unit="bpm" value={vitals.heart_rate} min={30} max={200} step={1} onChange={(v) => updateVital("heart_rate", v)} />
-                <VitalSlider icon={<Droplets className="h-3 w-3" />} label="MAP" unit="mmHg" value={vitals.map} min={30} max={140} step={1} onChange={(v) => updateVital("map", v)} />
-                <VitalSlider icon={<Thermometer className="h-3 w-3" />} label="Temperature" unit="°C" value={vitals.temperature} min={33} max={42} step={0.1} onChange={(v) => updateVital("temperature", v)} />
-                <VitalSlider icon={<Wind className="h-3 w-3" />} label="Resp Rate" unit="br/min" value={vitals.resp_rate} min={5} max={45} step={1} onChange={(v) => updateVital("resp_rate", v)} />
-                <VitalSlider icon={<Droplets className="h-3 w-3" />} label="SpO₂" unit="%" value={vitals.spo2} min={70} max={100} step={1} onChange={(v) => updateVital("spo2", v)} />
-                <VitalSlider icon={<Brain className="h-3 w-3" />} label="GCS" unit="" value={vitals.gcs_total} min={3} max={15} step={1} onChange={(v) => updateVital("gcs_total", v)} />
-                <VitalSlider icon={<Zap className="h-3 w-3" />} label="Lactate" unit="mmol/L" value={vitals.lactate} min={0.5} max={15} step={0.1} onChange={(v) => updateVital("lactate", v)} />
-                <VitalSlider icon={<Activity className="h-3 w-3" />} label="WBC" unit="K/µL" value={vitals.wbc} min={0.5} max={40} step={0.5} onChange={(v) => updateVital("wbc", v)} />
-                <VitalSlider icon={<Activity className="h-3 w-3" />} label="Creatinine" unit="mg/dL" value={vitals.creatinine} min={0.3} max={8} step={0.1} onChange={(v) => updateVital("creatinine", v)} />
-                <VitalSlider icon={<Activity className="h-3 w-3" />} label="Platelets" unit="K/µL" value={vitals.platelets} min={10} max={400} step={5} onChange={(v) => updateVital("platelets", v)} />
+              <CardContent className="pt-5 space-y-6">
+                <VitalSlider icon={<Heart className="h-4 w-4 text-rose-500" />} label="Heart Rate" unit="bpm" value={vitals.heart_rate} min={30} max={200} step={1} onChange={(v) => updateVital("heart_rate", v)} />
+                <VitalSlider icon={<Droplets className="h-4 w-4 text-blue-500" />} label="MAP" unit="mmHg" value={vitals.map} min={30} max={140} step={1} onChange={(v) => updateVital("map", v)} />
+                <VitalSlider icon={<Thermometer className="h-4 w-4 text-orange-500" />} label="Temperature" unit="°C" value={vitals.temperature} min={33} max={42} step={0.1} onChange={(v) => updateVital("temperature", v)} />
+                <VitalSlider icon={<Wind className="h-4 w-4 text-cyan-500" />} label="Resp Rate" unit="br/min" value={vitals.resp_rate} min={5} max={45} step={1} onChange={(v) => updateVital("resp_rate", v)} />
+                <VitalSlider icon={<Droplets className="h-4 w-4 text-blue-400" />} label="SpO₂" unit="%" value={vitals.spo2} min={70} max={100} step={1} onChange={(v) => updateVital("spo2", v)} />
+                <VitalSlider icon={<Brain className="h-4 w-4 text-purple-500" />} label="GCS" unit="" value={vitals.gcs_total} min={3} max={15} step={1} onChange={(v) => updateVital("gcs_total", v)} />
+                <VitalSlider icon={<Zap className="h-4 w-4 text-amber-500" />} label="Lactate" unit="mmol/L" value={vitals.lactate} min={0.5} max={15} step={0.1} onChange={(v) => updateVital("lactate", v)} />
+                <VitalSlider icon={<Activity className="h-4 w-4 text-slate-400" />} label="WBC" unit="K/µL" value={vitals.wbc} min={0.5} max={40} step={0.5} onChange={(v) => updateVital("wbc", v)} />
+                <VitalSlider icon={<Activity className="h-4 w-4 text-slate-400" />} label="Creatinine" unit="mg/dL" value={vitals.creatinine} min={0.3} max={8} step={0.1} onChange={(v) => updateVital("creatinine", v)} />
+                <VitalSlider icon={<Activity className="h-4 w-4 text-slate-400" />} label="Platelets" unit="K/µL" value={vitals.platelets} min={10} max={400} step={5} onChange={(v) => updateVital("platelets", v)} />
               </CardContent>
-            </Card>
+            </PremiumCard>
 
             {/* Action buttons */}
-            {mode === "manual" && (
-              <Button className="w-full" onClick={runPrediction} disabled={isLoading}>
-                {isLoading ? <span className="animate-pulse">Loading...</span> : <><Play className="h-4 w-4 mr-2" /> Run Prediction</>}
-              </Button>
-            )}
-            {mode === "simulated" && (
-              <div className="flex gap-2">
-                <Button className="flex-1" variant={simRunning ? "destructive" : "default"} onClick={() => setSimRunning(!simRunning)}>
-                  {simRunning ? <><Pause className="h-4 w-4 mr-1" /> Pause</> : <><Play className="h-4 w-4 mr-1" /> Start</>}
-                </Button>
-                <Button variant="outline" onClick={() => { runPrediction(); setSimStep((s) => s + 1); }}>
-                  <ChevronRight className="h-4 w-4" /> Step
-                </Button>
-                <Button variant="outline" onClick={() => { setSimStep(0); setHistory([]); setSimRunning(false); }}>
-                  <RotateCcw className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-            {mode === "simulated" && (
-              <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
-                <Timer className="h-3 w-3" />
-                Step {simStep} · {simStep * 15} min elapsed
-              </div>
-            )}
-          </div>
+            <AnimatePresence mode="wait">
+              {mode === "manual" && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                  <Button 
+                    className="w-full h-12 text-sm font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-900/20 transition-all" 
+                    onClick={runPrediction} 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <span className="animate-pulse flex items-center gap-2"><Activity className="h-4 w-4 animate-spin" /> Analyzing...</span> : <><Play className="h-4 w-4 mr-2" /> Run Prediction</>}
+                  </Button>
+                </motion.div>
+              )}
+              {mode === "simulated" && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3">
+                  <div className="flex gap-2">
+                    <Button 
+                      className={cn("flex-1 h-10 text-xs font-semibold rounded-xl shadow-md transition-all", simRunning ? "bg-red-500 hover:bg-red-600 shadow-red-500/20 text-white" : "bg-slate-900 hover:bg-slate-800 shadow-slate-900/20 text-white")} 
+                      onClick={() => setSimRunning(!simRunning)}
+                    >
+                      {simRunning ? <><Pause className="h-4 w-4 mr-1.5" /> Pause</> : <><Play className="h-4 w-4 mr-1.5" /> Start</>}
+                    </Button>
+                    <Button variant="outline" className="h-10 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 shadow-sm" onClick={() => { runPrediction(); setSimStep((s) => s + 1); }}>
+                      <ChevronRight className="h-4 w-4" /> Step
+                    </Button>
+                    <Button variant="outline" className="h-10 w-10 p-0 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700 shadow-sm" onClick={() => { setSimStep(0); setHistory([]); setSimRunning(false); }}>
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-[11px] font-mono font-medium text-slate-500 bg-slate-100/80 py-2 rounded-lg border border-slate-200/60">
+                    <Timer className="h-3.5 w-3.5 text-slate-400" />
+                    Step {simStep} · <span className="text-slate-700 font-bold">{simStep * 15} min elapsed</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
           {/* ── CENTER: Results ─────────────────────────── */}
-          <div className="lg:col-span-6 space-y-4">
+          <motion.div variants={fadeInUp} className="lg:col-span-6 space-y-5">
             {/* Alert Banner */}
-            {result && (
-              <div className={cn("border rounded-lg p-4 text-center", TIER_BG[result.alert_level])}>
-                <p className="text-lg font-mono font-black tracking-wider">
-                  ALERT: {result.alert_level} | Risk {(result.risk_score * 100).toFixed(1)}% | Confidence {(result.confidence * 100).toFixed(0)}%
-                </p>
-                {result.fast_tracked && (
-                  <p className="text-xs font-mono mt-1 text-purple-400">⚡ FAST-TRACKED due to low confidence</p>
-                )}
-              </div>
-            )}
+            <AnimatePresence>
+              {result && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className={cn(
+                    "border rounded-2xl p-5 text-center shadow-lg transition-all", 
+                    TIER_BG[result.alert_level]
+                  )}
+                >
+                  <p className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                    STATUS: <span className="font-mono uppercase px-2 py-0.5 rounded-lg bg-white/60 shadow-sm ml-1">{result.alert_level}</span>
+                  </p>
+                  <div className="flex items-center justify-center gap-4 mt-3">
+                    <span className="text-sm font-semibold text-slate-700 bg-white/70 px-4 py-1.5 rounded-full shadow-sm">
+                      Risk: {(result.risk_score * 100).toFixed(1)}%
+                    </span>
+                    <span className="text-sm font-semibold text-slate-700 bg-white/70 px-4 py-1.5 rounded-full shadow-sm">
+                      Confidence: {(result.confidence * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  {result.fast_tracked && (
+                    <motion.p 
+                      initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
+                      className="text-xs font-bold mt-4 text-purple-700 bg-purple-100/70 inline-block px-4 py-1.5 rounded-full shadow-sm"
+                    >
+                      ⚡ FAST-TRACKED (Low Model Confidence)
+                    </motion.p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Risk Gauge */}
-              <Card>
-                <CardHeader className="pb-1">
-                  <CardTitle className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                    Ensemble Risk Score
+              <PremiumCard className="md:col-span-1">
+                <CardHeader className="pb-1 border-b border-slate-100 bg-slate-50/50">
+                  <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500 text-center">
+                    Risk Score
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center">
-                  <div className="relative w-40 h-24">
-                    <svg viewBox="0 0 100 55" className="w-full h-full">
-                      <path d="M 5 50 A 45 45 0 0 1 95 50" fill="none" stroke="hsl(220, 13%, 18%)" strokeWidth="6" strokeLinecap="round" />
-                      <path d="M 5 50 A 45 45 0 0 1 95 50" fill="none" stroke={gaugeColor} strokeWidth="6" strokeLinecap="round"
+                <CardContent className="flex flex-col items-center pt-5 pb-3">
+                  <div className="relative w-36 h-20">
+                    <svg viewBox="0 0 100 55" className="w-full h-full drop-shadow-sm">
+                      <path d="M 5 50 A 45 45 0 0 1 95 50" fill="none" stroke="#f1f5f9" strokeWidth="8" strokeLinecap="round" />
+                      <path d="M 5 50 A 45 45 0 0 1 95 50" fill="none" stroke={gaugeColor} strokeWidth="8" strokeLinecap="round"
                         strokeDasharray={`${gaugeCirc}`} strokeDashoffset={gaugeOffset}
-                        style={{ transition: "stroke-dashoffset 0.6s ease-out, stroke 0.3s" }} />
+                        style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s" }} />
                     </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
-                      <span className="text-3xl font-mono font-black" style={{ color: gaugeColor }}>
+                    <div className="absolute inset-0 flex flex-col items-center justify-end pb-0">
+                      <span className="text-3xl font-bold tracking-tighter" style={{ color: gaugeColor !== "#e2e8f0" ? gaugeColor : "#94a3b8" }}>
                         {result ? (result.risk_score * 100).toFixed(1) : "—"}%
                       </span>
                     </div>
                   </div>
-                  <p className="text-[10px] font-mono text-muted-foreground mt-1">0% (Safe) — 100% (Septic)</p>
+                  <p className="text-[10px] font-semibold text-slate-400 mt-3">0% (Safe) — 100% (Septic)</p>
                 </CardContent>
-              </Card>
+              </PremiumCard>
 
               {/* Decision Summary */}
-              <Card>
-                <CardHeader className="pb-1">
-                  <CardTitle className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                    Decision Summary
+              <PremiumCard className="md:col-span-1">
+                <CardHeader className="pb-2 border-b border-slate-100 bg-slate-50/50">
+                  <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    Model Factors
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Alert Level</span>
-                    <Badge className={cn("text-[10px]", result ? TIER_COLORS[result.alert_level] : "")}>{result?.alert_level ?? "—"}</Badge>
+                <CardContent className="pt-3 space-y-2.5 text-xs font-medium">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500">Alert Level</span>
+                    <Badge className={cn("text-[9px] font-bold uppercase px-1.5 py-0", result ? TIER_COLORS[result.alert_level] : "bg-slate-100 text-slate-400")}>{result?.alert_level ?? "—"}</Badge>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tripwires</span>
-                    <span className="font-mono font-bold">{result?.n_active_tripwires ?? 0} / 7</span>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
+                    <span className="text-slate-500">Tripwires</span>
+                    <span className="font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">{result?.n_active_tripwires ?? 0} / 7</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">LSTM Score</span>
-                    <span className="font-mono">{result?.lstm_score?.toFixed(3) ?? "—"}</span>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
+                    <span className="text-slate-500">LSTM</span>
+                    <span className="font-mono text-slate-700 font-semibold">{result?.lstm_score?.toFixed(3) ?? "—"}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">XGBoost Score</span>
-                    <span className="font-mono">{result?.xgb_score?.toFixed(3) ?? "—"}</span>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
+                    <span className="text-slate-500">XGBoost</span>
+                    <span className="font-mono text-slate-700 font-semibold">{result?.xgb_score?.toFixed(3) ?? "—"}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Conformal</span>
-                    <span className="font-mono text-[10px]">[{result?.conformal_interval?.[0]?.toFixed(3) ?? "—"}, {result?.conformal_interval?.[1]?.toFixed(3) ?? "—"}]</span>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
+                    <span className="text-slate-500">Conformal</span>
+                    <span className="font-mono text-[9px] text-slate-600 bg-slate-50 px-1 py-0.5 rounded font-semibold">[{result?.conformal_interval?.[0]?.toFixed(2) ?? "-"}, {result?.conformal_interval?.[1]?.toFixed(2) ?? "-"}]</span>
                   </div>
                 </CardContent>
-              </Card>
+              </PremiumCard>
 
               {/* Vitals Snapshot */}
-              <Card>
-                <CardHeader className="pb-1">
-                  <CardTitle className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                    Vital Signs Status
+              <PremiumCard className="md:col-span-1">
+                <CardHeader className="pb-2 border-b border-slate-100 bg-slate-50/50">
+                  <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                    Vitals Status
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-1 text-[11px] font-mono">
+                <CardContent className="pt-3">
+                  <div className="space-y-2 text-[11px] font-medium">
                     {[
                       { label: "Heart Rate", val: vitals.heart_rate, unit: "bpm", lo: 60, hi: 100 },
                       { label: "MAP", val: vitals.map, unit: "mmHg", lo: 70, hi: 105 },
                       { label: "Temp", val: vitals.temperature, unit: "°C", lo: 36.0, hi: 38.3 },
-                      { label: "RR", val: vitals.resp_rate, unit: "br/m", lo: 12, hi: 20 },
                       { label: "SpO₂", val: vitals.spo2, unit: "%", lo: 95, hi: 100 },
-                      { label: "GCS", val: vitals.gcs_total, unit: "", lo: 14, hi: 15 },
-                      { label: "Lactate", val: vitals.lactate, unit: "mmol/L", lo: 0.5, hi: 2.0 },
+                      { label: "Lactate", val: vitals.lactate, unit: "mM", lo: 0.5, hi: 2.0 },
                     ].map((v) => {
                       const s = vitalStatus(v.val, v.lo, v.hi);
                       return (
-                        <div key={v.label} className="flex justify-between items-center">
-                          <span className="text-muted-foreground">{v.label}</span>
+                        <div key={v.label} className="flex justify-between items-center border-b border-slate-50 last:border-0 pb-1.5 last:pb-0">
+                          <span className="text-slate-500">{v.label}</span>
                           <div className="flex items-center gap-2">
-                            <span>{v.val.toFixed(v.unit === "°C" || v.unit === "mmol/L" ? 1 : 0)} {v.unit}</span>
-                            <span className={cn("text-[9px] font-bold w-14 text-right", s.cls)}>{s.label}</span>
+                            <span className="font-mono text-slate-700 font-semibold">{v.val.toFixed(v.unit === "°C" || v.unit === "mM" ? 1 : 0)}</span>
+                            <span className={cn("text-[9px] w-12 text-right tracking-tight", s.cls)}>{s.label}</span>
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 </CardContent>
-              </Card>
+              </PremiumCard>
             </div>
 
             {/* Tripwires */}
-            {result && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    Red Team Clinical Tripwires ({result.n_active_tripwires} active)
-                    {result.has_extreme && <Badge variant="destructive" className="text-[9px] ml-2">EXTREME VALUE</Badge>}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {result.tripwires.map((tw) => (
-                      <div key={tw.name} className={cn(
-                        "p-2 rounded border text-xs font-mono",
-                        tw.triggered
-                          ? "border-red-500/40 bg-red-950/20 text-red-300"
-                          : "border-border bg-card text-muted-foreground"
-                      )}>
-                        <div className="flex justify-between items-center">
-                          <span className="font-bold">{tw.name}</span>
-                          <span>{tw.value.toFixed(1)}</span>
-                        </div>
-                        <p className="text-[10px] mt-0.5 opacity-70">
-                          {tw.triggered ? tw.reason : "Normal"}
-                        </p>
+            <AnimatePresence>
+              {result && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                  <PremiumCard>
+                    <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-700 flex items-center gap-2">
+                        <AlertTriangle className={cn("h-4 w-4", result.n_active_tripwires > 0 ? "text-amber-500" : "text-slate-400")} />
+                        Clinical Tripwires
+                        <Badge variant="secondary" className="ml-2 bg-slate-200 text-slate-700 hover:bg-slate-200">{result.n_active_tripwires} active</Badge>
+                        {result.has_extreme && <Badge variant="destructive" className="text-[9px] ml-auto bg-red-500 shadow-sm font-bold">EXTREME VALUE</Badge>}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {result.tripwires.map((tw) => (
+                          <motion.div 
+                            whileHover={{ scale: 1.02 }}
+                            key={tw.name} 
+                            className={cn(
+                              "p-3 rounded-xl border transition-colors",
+                              tw.triggered
+                                ? "border-red-200 bg-red-50/50 shadow-sm"
+                                : "border-slate-100 bg-slate-50/50"
+                            )}
+                          >
+                            <div className="flex justify-between items-center mb-1">
+                              <span className={cn("text-xs font-bold", tw.triggered ? "text-red-700" : "text-slate-600")}>{tw.name}</span>
+                              <span className={cn("font-mono text-xs font-semibold", tw.triggered ? "text-red-600" : "text-slate-500")}>{tw.value.toFixed(1)}</span>
+                            </div>
+                            <p className={cn("text-[11px] font-medium leading-tight", tw.triggered ? "text-red-600/80" : "text-slate-400")}>
+                              {tw.triggered ? tw.reason : "Normal parameter range"}
+                            </p>
+                          </motion.div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                    </CardContent>
+                  </PremiumCard>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Actions */}
-            {result && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                    Recommended Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-1">
-                  {result.actions.map((a, i) => (
-                    <p key={i} className="text-xs font-mono text-foreground">{a}</p>
-                  ))}
-                  <p className="text-[10px] text-muted-foreground mt-2 italic">{result.reasoning}</p>
-                </CardContent>
-              </Card>
-            )}
+            <AnimatePresence>
+              {result && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+                  <PremiumCard className="border-blue-100 shadow-blue-900/5">
+                    <CardHeader className="pb-3 border-b border-blue-50 bg-blue-50/50">
+                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-blue-700 flex items-center gap-2">
+                        <Activity className="h-4 w-4" /> Recommended Actions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4 space-y-3">
+                      <ul className="space-y-2">
+                        {result.actions.map((a, i) => (
+                          <li key={i} className="flex items-start gap-3 text-sm font-medium text-slate-700 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                            <span className="leading-relaxed">{a}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="mt-4 p-3 bg-blue-50/50 rounded-xl border border-blue-100">
+                        <p className="text-[11px] text-blue-800/80 font-medium leading-relaxed flex gap-2">
+                          <Brain className="h-4 w-4 shrink-0 text-blue-500/70" />
+                          {result.reasoning}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </PremiumCard>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Phase 2: CXR Findings */}
-            {result?.cxr_findings && result.cxr_findings.findings && result.cxr_findings.findings.length > 0 && (
-              <Card className="border-cyan-500/30 bg-cyan-950/10">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-mono uppercase tracking-wider text-cyan-400 flex items-center gap-2">
-                    📷 Chest X-Ray Findings
-                    <Badge variant="outline" className="border-cyan-500/40 text-cyan-400 text-[9px] font-normal">
-                      DenseNet121 · CheXpert
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {result.cxr_findings.findings.map((f: { name: string; score: number; severity: string }, i: number) => (
-                    <div key={i} className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-slate-300">{f.name}</span>
-                      <Badge variant="outline" className={cn("text-[10px]",
-                        f.severity === "HIGH" ? "border-red-500/50 text-red-400" : "border-amber-500/50 text-amber-400"
-                      )}>
-                        {(f.score * 100).toFixed(0)}% · {f.severity}
-                      </Badge>
-                    </div>
-                  ))}
-                  <div className="pt-1 border-t border-cyan-500/20">
-                    <p className="text-[10px] text-cyan-300/70 font-mono">
-                      Risk modifier: +{((result.cxr_findings.risk_modifier || 0) * 100).toFixed(1)}% | {result.cxr_findings.summary}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <AnimatePresence>
+              {result?.cxr_findings && result.cxr_findings.findings && result.cxr_findings.findings.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                  <PremiumCard className="border-cyan-200 bg-gradient-to-b from-cyan-50/50 to-white shadow-cyan-900/5">
+                    <CardHeader className="pb-3 border-b border-cyan-100/50">
+                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-cyan-800 flex items-center gap-2">
+                        <Upload className="h-4 w-4 text-cyan-600" /> CXR AI Findings
+                        <Badge variant="outline" className="ml-auto border-cyan-200 text-cyan-700 bg-cyan-50 text-[9px] font-semibold">
+                          DenseNet121 · CheXpert
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4 space-y-3">
+                      {result.cxr_findings.findings.map((f: { name: string; score: number; severity: string }, i: number) => (
+                        <div key={i} className="flex justify-between items-center text-sm font-medium p-3 bg-white rounded-xl border border-cyan-100 shadow-sm">
+                          <span className="text-slate-700 font-semibold">{f.name}</span>
+                          <Badge variant="outline" className={cn("text-[10px] font-bold px-2 py-0.5",
+                            f.severity === "HIGH" ? "border-red-200 text-red-700 bg-red-50" : "border-amber-200 text-amber-700 bg-amber-50"
+                          )}>
+                            {(f.score * 100).toFixed(0)}% · {f.severity}
+                          </Badge>
+                        </div>
+                      ))}
+                      <div className="pt-3 mt-1 border-t border-cyan-100">
+                        <p className="text-[11px] text-cyan-800 font-medium flex items-center gap-2">
+                          <Activity className="h-3.5 w-3.5 text-cyan-500" />
+                          Risk modifier: +{((result.cxr_findings.risk_modifier || 0) * 100).toFixed(1)}% | {result.cxr_findings.summary}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </PremiumCard>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Phase 2: Clinical AI Narrative */}
-            {result?.clinical_narrative && (
-              <Card className="border-violet-500/30 bg-violet-950/10">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-mono uppercase tracking-wider text-violet-400 flex items-center gap-2">
-                    <Stethoscope className="h-3.5 w-3.5" /> Clinical AI Assessment
-                    <Badge variant="outline" className="border-violet-500/40 text-violet-400 text-[9px] font-normal">
-                      Llama 3.2 3B
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-slate-300 leading-relaxed">
-                    {result.clinical_narrative}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+            <AnimatePresence>
+              {result?.clinical_narrative && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                  <PremiumCard className="border-violet-200 bg-gradient-to-b from-violet-50/50 to-white shadow-violet-900/5">
+                    <CardHeader className="pb-3 border-b border-violet-100/50">
+                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-violet-800 flex items-center gap-2">
+                        <Stethoscope className="h-4 w-4 text-violet-600" /> Clinical AI Assessment
+                        <Badge variant="outline" className="ml-auto border-violet-200 text-violet-700 bg-violet-50 text-[9px] font-semibold">
+                          Llama 3.2 3B
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <p className="text-sm text-slate-700 leading-relaxed font-medium">
+                        {result.clinical_narrative}
+                      </p>
+                    </CardContent>
+                  </PremiumCard>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Phase 2: Demographics Note */}
-            {result?.demographics && (
-              <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground px-1">
-                <User className="h-3 w-3" />
-                Patient: {result.demographics.age}y {result.demographics.gender} — {result.demographics.age_risk_note}
-              </div>
-            )}
-          </div>
+            <AnimatePresence>
+              {result?.demographics && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center gap-2 text-xs font-medium text-slate-500 py-2">
+                  <User className="h-3.5 w-3.5 text-slate-400" />
+                  Patient context: <span className="text-slate-700 font-bold">{result.demographics.age}y {result.demographics.gender}</span> — {result.demographics.age_risk_note}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
           {/* ── RIGHT: Timeline ────────────────────────── */}
-          <div className="lg:col-span-3 space-y-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                  <Clock className="h-3.5 w-3.5" /> Risk Timeline
+          <motion.div variants={fadeInUp} className="lg:col-span-3 space-y-5">
+            <PremiumCard>
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                  <Clock className="h-3.5 w-3.5 text-slate-400" /> Risk Timeline
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 {history.length === 0 ? (
-                  <p className="text-[10px] text-muted-foreground font-mono">
-                    Change vitals to build timeline...
-                  </p>
+                  <div className="h-32 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                    <p className="text-xs text-slate-400 font-medium text-center px-4">
+                      Adjust vitals or run simulation to build timeline
+                    </p>
+                  </div>
                 ) : (
-                  <div className="space-y-1">
+                  <div className="space-y-3">
                     {/* Simple bar chart */}
-                    <div className="flex items-end gap-[2px] h-32">
+                    <div className="flex items-end gap-[3px] h-32 p-2 bg-slate-50 rounded-xl border border-slate-100">
                       {history.slice(-30).map((h, i) => (
-                        <div key={i} className="flex-1 flex flex-col justify-end min-w-[3px]">
-                          <div
-                            className={cn("rounded-t-sm min-h-[2px] transition-all", 
-                              h.risk > 0.5 ? "bg-red-500" : h.risk > 0.3 ? "bg-amber-500" : "bg-emerald-500")}
-                            style={{ height: `${Math.max(2, h.risk * 100)}%` }}
+                        <div key={i} className="flex-1 flex flex-col justify-end min-w-[4px] group relative">
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: `${Math.max(4, h.risk * 100)}%` }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className={cn("rounded-sm w-full transition-colors", 
+                              h.risk > 0.5 ? "bg-red-500 group-hover:bg-red-400" : h.risk > 0.3 ? "bg-amber-400 group-hover:bg-amber-300" : "bg-emerald-400 group-hover:bg-emerald-300")}
                           />
                         </div>
                       ))}
                     </div>
-                    <div className="flex justify-between text-[9px] font-mono text-muted-foreground">
+                    <div className="flex justify-between text-[10px] font-mono font-bold text-slate-400 px-1">
                       <span>{history[0]?.time}</span>
                       <span>{history[history.length - 1]?.time}</span>
                     </div>
                   </div>
                 )}
               </CardContent>
-            </Card>
+            </PremiumCard>
 
             {/* Pipeline Info */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                  Pipeline Info
+            <PremiumCard>
+              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+                  Pipeline Architecture
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-[11px] font-mono space-y-1 text-muted-foreground">
-                <div className="flex justify-between"><span>Backend</span><span className="text-primary">{result?.backend === "client_fallback" ? "Client Fallback" : "AWS EC2 API"}</span></div>
-                <div className="flex justify-between"><span>LSTM Weight</span><span>30%</span></div>
-                <div className="flex justify-between"><span>XGBoost Weight</span><span>70%</span></div>
-                <div className="flex justify-between"><span>Conformal q_α</span><span>0.2663</span></div>
-                <div className="flex justify-between"><span>Tripwires</span><span>7+2 imaging</span></div>
-                <div className="flex justify-between"><span>CXR Model</span><span>DenseNet121</span></div>
-                <div className="flex justify-between"><span>LLM Agent</span><span>Llama 3.2 3B</span></div>
-                <div className="flex justify-between"><span>Normalization</span><span>MIMIC-IV</span></div>
+              <CardContent className="pt-4 space-y-3 text-xs font-medium">
+                <div className="flex justify-between items-center"><span className="text-slate-500">Backend</span><Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-bold shadow-sm">{result?.backend === "client_fallback" ? "Client Fallback" : "AWS EC2 API"}</Badge></div>
+                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">LSTM Weight</span><span className="font-mono text-slate-700 font-semibold">30%</span></div>
+                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">XGBoost Weight</span><span className="font-mono text-slate-700 font-semibold">70%</span></div>
+                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">Conformal q_α</span><span className="font-mono text-slate-700 font-semibold">0.2663</span></div>
+                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">Tripwires</span><span className="font-mono text-slate-700 font-semibold">7+2 imaging</span></div>
+                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">CXR Model</span><span className="font-mono text-slate-700 font-semibold">DenseNet121</span></div>
+                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">LLM Agent</span><span className="font-mono text-slate-700 font-semibold">Llama 3.2 3B</span></div>
+                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">Normalization</span><span className="font-mono text-slate-700 font-semibold">MIMIC-IV</span></div>
               </CardContent>
-            </Card>
-          </div>
-        </div>
+            </PremiumCard>
+          </motion.div>
+        </motion.div>
       </main>
     </div>
   );
@@ -592,17 +715,17 @@ function VitalSlider({ icon, label, unit, value, min, max, step, onChange }: {
   onChange: (v: number) => void;
 }) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">{icon} {label}</div>
-        <span className="text-xs font-mono font-bold text-foreground">
-          {step < 1 ? value.toFixed(1) : value} {unit}
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">{icon} {label}</div>
+        <span className="text-sm font-mono font-bold text-slate-900 bg-slate-100 px-3 py-1.5 rounded-lg shadow-sm border border-slate-200">
+          {step < 1 ? value.toFixed(1) : value} <span className="text-[10px] text-slate-500 ml-0.5">{unit}</span>
         </span>
       </div>
       <Slider
         min={min} max={max} step={step} value={[value]}
         onValueChange={([v]) => onChange(v)}
-        className="py-1"
+        className="py-1 cursor-pointer"
       />
     </div>
   );
