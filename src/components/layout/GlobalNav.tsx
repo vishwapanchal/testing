@@ -14,54 +14,7 @@ const ROLE_STYLES: Record<StaffRole, { label: string; className: string }> = {
   admin: { label: "Admin", className: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
 };
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-
-const PHRASES = [
-  "Monitoring 240 active beds...",
-  "Running Predictive ML models...",
-  "Predicting sepsis onset...",
-  "Saving lives in real-time...",
-];
-
-function TypewriterText() {
-  const [phraseIdx, setPhraseIdx] = useState(0);
-  const [text, setText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    const currentPhrase = PHRASES[phraseIdx];
-    const typingSpeed = isDeleting ? 30 : 60;
-    
-    const timeout = setTimeout(() => {
-      if (!isDeleting && text === currentPhrase) {
-        setTimeout(() => setIsDeleting(true), 2000);
-        return;
-      }
-      
-      if (isDeleting && text === "") {
-        setIsDeleting(false);
-        setPhraseIdx((prev) => (prev + 1) % PHRASES.length);
-        return;
-      }
-      
-      setText(currentPhrase.substring(0, text.length + (isDeleting ? -1 : 1)));
-    }, typingSpeed);
-    
-    return () => clearTimeout(timeout);
-  }, [text, isDeleting, phraseIdx]);
-
-  return (
-    <div className="hidden xl:flex items-center flex-1 justify-center px-4">
-      <div className="text-xs font-mono text-slate-500 bg-slate-50/80 px-4 py-1.5 rounded-full border border-slate-200/60 shadow-inner whitespace-nowrap min-w-[240px] flex items-center justify-start gap-1">
-        <Activity className="h-3 w-3 text-blue-500 animate-pulse" />
-        <span>
-          {text}<span className="animate-ping text-blue-500 ml-[1px]">|</span>
-        </span>
-      </div>
-    </div>
-  );
-}
 
 export function GlobalNav() {
   const { profile, signOut } = useAuth();
@@ -103,8 +56,7 @@ export function GlobalNav() {
           </nav>
         </div>
 
-        {/* Middle: Typewriter Text */}
-        <TypewriterText />
+        {/* Removed Typewriter Text */}
 
         {/* Right: Status + Controls */}
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
