@@ -19,47 +19,53 @@ export function PatientCard({ patient, latestRisk, riskHistory, activeTripwireCo
   const score = latestRisk?.quantum_risk_score;
   const isCriticalOverride = activeTripwireCount >= 2;
 
-  const borderClass = {
-    CRITICAL: "border-tier-critical/40",
-    AMBER: "border-tier-amber/30",
-    WATCH: "border-border",
+  const borderClasses = {
+    CRITICAL: "border-red-200",
+    AMBER: "border-orange-200",
+    WATCH: "border-slate-200",
   };
 
   return (
     <Card
       onClick={() => navigate(`/patient/${patient.id}`)}
       className={cn(
-        "cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg",
-        borderClass[isCriticalOverride ? "CRITICAL" : tier],
-        isCriticalOverride && "animate-flash-critical"
+        "cursor-pointer transition-all duration-300 bg-white border shadow-sm group hover:-translate-y-1 hover:shadow-xl rounded-[1.5rem] overflow-hidden",
+        borderClasses[isCriticalOverride ? "CRITICAL" : tier],
+        isCriticalOverride && "ring-1 ring-red-400 animate-pulse-critical"
       )}
     >
-      <CardContent className="p-4 space-y-3">
+      <CardContent className="p-5 space-y-4">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-mono font-semibold text-foreground text-sm">{patient.name}</h3>
-            <p className="text-muted-foreground text-xs font-mono">
-              Bed {patient.bed_number} · {patient.mrn}
-            </p>
+            <h3 className="font-sora font-bold text-slate-900 text-lg mb-0.5">{patient.name}</h3>
+            <div className="flex items-center gap-2 text-slate-500 text-xs font-medium uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md">Bed {patient.bed_number}</span>
+              <span>MRN: {patient.mrn}</span>
+            </div>
           </div>
           <TierBadge tier={isCriticalOverride ? "CRITICAL" : tier} size="sm" />
         </div>
 
-        <div className="flex items-center gap-3">
-          <Activity className="h-3.5 w-3.5 text-muted-foreground" />
-          <div className="flex-1">
+        <div className="pt-2">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Quantum Risk Trend</span>
+            {score !== undefined && (
+              <span className="font-mono text-sm font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">
+                {score.toFixed(2)}
+              </span>
+            )}
+          </div>
+          <div className="h-12 w-full bg-slate-50 rounded-lg p-1.5 border border-slate-100 overflow-hidden">
             <RiskSparkline assessments={riskHistory} tier={tier} />
           </div>
-          {score !== undefined && (
-            <span className="font-mono text-xs font-bold text-foreground">
-              {score.toFixed(2)}
-            </span>
-          )}
         </div>
 
         {isCriticalOverride && (
-          <div className="text-[10px] font-mono text-tier-critical font-bold uppercase tracking-wider">
-            ⚠ {activeTripwireCount} TRIPWIRES ACTIVE — CRITICAL OVERRIDE
+          <div className="mt-2 flex items-center justify-center gap-2 bg-red-50 border border-red-200 py-2 px-3 rounded-xl">
+            <Activity className="w-3.5 h-3.5 text-red-600 animate-bounce" />
+            <span className="text-[10px] font-bold text-red-700 uppercase tracking-widest">
+              {activeTripwireCount} Tripwires — Critical Override
+            </span>
           </div>
         )}
       </CardContent>

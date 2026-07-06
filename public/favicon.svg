@@ -1,0 +1,36 @@
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="primary-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" />
+      <stop offset="50%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+    <linearGradient id="secondary-grad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#312e81" />
+    </linearGradient>
+    <linearGradient id="highlight-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <rect width="100" height="100" rx="20" fill="#0f172a" />
+  
+  <circle cx="50" cy="50" r="12" fill="url(#highlight-grad)" filter="url(#glow)" />
+  <path d="M 50 20 A 30 30 0 1 1 49.9 20" stroke="url(#primary-grad)" stroke-width="3" stroke-dasharray="40 20" stroke-linecap="round" />
+  <path d="M 50 5 L 88.97 27.5 L 88.97 72.5 L 50 95 L 11.03 72.5 L 11.03 27.5 Z" stroke="url(#secondary-grad)" stroke-width="4" fill="transparent" stroke-dasharray="80 30" stroke-linecap="round" />
+  
+  <g>
+    <rect x="44" y="30" width="12" height="40" rx="4" fill="url(#primary-grad)" opacity="0.9" />
+    <rect x="30" y="44" width="40" height="12" rx="4" fill="url(#primary-grad)" opacity="0.9" />
+    <path d="M 50 43 L 57 50 L 50 57 L 43 50 Z" fill="#ffffff" opacity="0.8" />
+  </g>
+</svg>

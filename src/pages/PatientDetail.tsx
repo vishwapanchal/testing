@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { GlobalNav } from "@/components/layout/GlobalNav";
 import { usePatients } from "@/hooks/usePatients";
 import { usePatientVitals } from "@/hooks/usePatientVitals";
@@ -23,8 +24,30 @@ import { predict } from "@/lib/demoEngine";
 import { CXRUploadPanel } from "@/components/patient/CXRUploadPanel";
 import type { RiskTier, MentalStatus } from "@/types/database";
 
+// Animation Variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 120, damping: 14 },
+  },
+};
+
+const glassClasses = "rounded-2xl border border-slate-200 bg-white shadow-xl overflow-hidden transition-all duration-300 hover:border-slate-300 hover:shadow-2xl relative";
+
 const PatientDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { data: patients } = usePatients();
   const { data: vitals } = usePatientVitals(id);
   const { data: assessments } = useRiskAssessments(id);
@@ -112,88 +135,174 @@ const PatientDetail = () => {
 
   if (!patient) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground font-mono">Loading patient data...</p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <motion.div
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-500 font-mono uppercase tracking-widest text-sm">Loading Data...</p>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <GlobalNav />
-      <div className="p-4 space-y-4 max-w-[1600px] mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <PatientTopBar patient={patient} tier={tier} isCriticalOverride={isCriticalOverride} />
-        <div className="flex items-center gap-2 shrink-0">
-          {/* HITL: Manual data entry points */}
-          <LogVitalsDrawer patientId={patient.id} />
-          <LogLabsDrawer patientId={patient.id} />
-          <DischargePatientDialog patientId={patient.id} patientName={patient.name} />
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden text-slate-900">
+      <div className="relative z-10">
+        <GlobalNav />
+        
+        <div className="max-w-[1800px] mx-auto px-4 md:px-6 lg:px-8 mt-4">
+          <Button variant="ghost" className="text-slate-500 hover:text-slate-900 mb-4 font-medium pl-0" onClick={() => navigate(-1)}>
+            &larr; Back to Dashboard
+          </Button>
         </div>
-      </div>
+        
+        <motion.div 
+          variants={containerVariants} 
+          initial="hidden" 
+          animate="visible" 
+          className="p-4 md:p-6 lg:p-8 pt-0 space-y-6 max-w-[1800px] mx-auto"
+        >
+          <motion.div 
+            variants={itemVariants} 
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200 bg-white shadow-xl relative overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-transparent pointer-events-none" />
+            <div className="relative z-10 w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <PatientTopBar patient={patient} tier={tier} isCriticalOverride={isCriticalOverride} />
+              <div className="flex items-center gap-3 shrink-0">
+                <LogVitalsDrawer patientId={patient.id} />
+                <LogLabsDrawer patientId={patient.id} />
+                <DischargePatientDialog patientId={patient.id} patientName={patient.name} />
+              </div>
+            </div>
+          </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          {/* Left Column: Slider-based Vitals/Labs Input */}
-          <div className="lg:col-span-3 space-y-4">
-            <VitalsOverridePanel
-              initialVitals={initialVitals}
-              onVitalsChange={handleVitalsChange}
-            />
-          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bento-grid">
+            {/* Left Column: Slider-based Vitals/Labs Input */}
+            <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6 flex flex-col">
+              <div className={`${glassClasses} h-full p-1`}>
+                <VitalsOverridePanel
+                  initialVitals={initialVitals}
+                  onVitalsChange={handleVitalsChange}
+                />
+              </div>
+            </motion.div>
 
-          {/* Center Column: DB Vitals & Charts */}
-          <div className="lg:col-span-5 space-y-4">
-            <VitalsPanel latestVital={latestVital} />
-            <VitalsChart vitals={vitals ?? []} />
-            <LabsPanel lab={lab} />
-          </div>
+            {/* Center Column: DB Vitals & Charts */}
+            <motion.div variants={itemVariants} className="lg:col-span-5 space-y-6 flex flex-col">
+              <div className={`${glassClasses} p-1`}>
+                <VitalsPanel latestVital={latestVital} />
+              </div>
+              <div className={`${glassClasses} flex-1 p-1 min-h-[300px]`}>
+                <VitalsChart vitals={vitals ?? []} />
+              </div>
+              <div className={`${glassClasses} p-1`}>
+                <LabsPanel lab={lab} />
+              </div>
+            </motion.div>
 
-          {/* Right Column: Live Risk (from sliders) + HITL Actions */}
-          <div className="lg:col-span-4 space-y-4">
-            <RiskGauge assessment={effectiveRisk as any} />
-            <ConfidenceInterval assessment={effectiveRisk as any} />
+            {/* Right Column: Live Risk + HITL Actions */}
+            <motion.div variants={itemVariants} className="lg:col-span-4 space-y-6 flex flex-col">
+              <div className={`${glassClasses}`}>
+                <RiskGauge assessment={effectiveRisk as any} />
+              </div>
+              <div className={`${glassClasses}`}>
+                <ConfidenceInterval assessment={effectiveRisk as any} />
+              </div>
 
-            {/* Live tripwires from slider prediction */}
-            {liveResult && liveResult.n_active_tripwires > 0 && (
-              <div className="rounded-lg border border-red-500/30 bg-red-950/10 p-3 space-y-2">
-                <p className="text-xs font-mono text-red-400 uppercase tracking-wider">
-                  ⚠ Live Tripwires ({liveResult.n_active_tripwires} active)
-                  {liveResult.has_extreme && <span className="ml-2 text-red-300 font-bold">EXTREME</span>}
-                </p>
-                {liveResult.tripwires
-                  .filter((t) => t.triggered)
-                  .map((tw) => (
-                    <div key={tw.name} className="flex justify-between text-xs font-mono text-red-300">
-                      <span>{tw.name}</span>
-                      <span>{tw.value.toFixed(1)} — {tw.reason}</span>
+              {/* Live tripwires from slider prediction */}
+              <AnimatePresence mode="popLayout">
+                {liveResult && liveResult.n_active_tripwires > 0 && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, height: "auto", scale: 1 }}
+                    exit={{ opacity: 0, height: 0, scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                    className="rounded-2xl border border-red-200 bg-red-50 p-5 shadow-xl relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-red-500/5 animate-pulse pointer-events-none" />
+                    <p className="text-sm font-semibold font-mono text-red-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                      </span>
+                      Live Tripwires ({liveResult.n_active_tripwires} active)
+                      {liveResult.has_extreme && <span className="ml-auto text-white font-bold bg-red-600 px-2 py-0.5 rounded shadow-lg">EXTREME</span>}
+                    </p>
+                    <div className="space-y-2 relative z-10">
+                      {liveResult.tripwires
+                        .filter((t) => t.triggered)
+                        .map((tw, idx) => (
+                          <motion.div 
+                            key={tw.name}
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="flex justify-between items-center text-xs font-mono text-red-900 bg-white p-2.5 rounded-lg border border-red-100 shadow-sm"
+                          >
+                            <span className="font-semibold">{tw.name}</span>
+                            <span className="opacity-80 text-right">{tw.value.toFixed(1)} — {tw.reason}</span>
+                          </motion.div>
+                        ))}
                     </div>
-                  ))}
-              </div>
-            )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-            {/* Live recommended actions */}
-            {liveResult && (
-              <div className="rounded-lg border border-border bg-card p-3 space-y-2">
-                <p className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                  Recommended Actions
-                </p>
-                {liveResult.actions.map((a, i) => (
-                  <p key={i} className="text-xs font-mono text-foreground">{a}</p>
-                ))}
-                <p className="text-[10px] text-muted-foreground italic mt-1">{liveResult.reasoning}</p>
-              </div>
-            )}
+              {/* Live recommended actions */}
+              <AnimatePresence mode="popLayout">
+                {liveResult && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                    className="rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-xl relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent pointer-events-none" />
+                    <p className="text-xs font-semibold font-mono text-blue-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Recommended Actions
+                    </p>
+                    <div className="space-y-2 relative z-10">
+                      {liveResult.actions.map((a, i) => (
+                        <motion.div 
+                          key={i} 
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          className="text-xs font-mono text-blue-900 flex items-start gap-2 bg-white p-2.5 rounded border border-blue-100 shadow-sm"
+                        >
+                          <span className="text-blue-600 mt-0.5">▸</span> {a}
+                        </motion.div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-blue-600/70 italic mt-4 border-t border-blue-200 pt-3">{liveResult.reasoning}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-            {/* HITL Actions */}
-            <HITLActionPanel
-              tier={tier}
-              isCriticalOverride={isCriticalOverride}
-              patientName={patient.name}
-            />
-            <TripwirePanel alerts={alerts ?? []} latestVital={latestVital} />
-            <CXRUploadPanel />
+              <div className={`${glassClasses}`}>
+                <HITLActionPanel
+                  tier={tier}
+                  isCriticalOverride={isCriticalOverride}
+                  patientName={patient.name}
+                />
+              </div>
+              <div className={`${glassClasses}`}>
+                <TripwirePanel alerts={alerts ?? []} latestVital={latestVital} />
+              </div>
+              <div className={`${glassClasses}`}>
+                <CXRUploadPanel />
+              </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Clinical AI Chat - floating bubble */}

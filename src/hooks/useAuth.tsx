@@ -23,6 +23,7 @@ interface AuthContextType {
   loading: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  signInAsDemo: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signOut: async () => {},
   refreshProfile: async () => {},
+  signInAsDemo: () => {},
 });
 
 export function useAuth() {
@@ -42,85 +44,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (error || !data) {
-      setProfile(null);
-      return;
-    }
-
-    // Fetch hospital name if hospital_id exists
-    let hospitalName: string | null = null;
-    if (data.hospital_id) {
-      const { data: hospital } = await supabase
-        .from("hospitals")
-        .select("name")
-        .eq("id", data.hospital_id)
-        .maybeSingle();
-      hospitalName = hospital?.name ?? null;
-    }
-
-    setProfile({
-      id: data.id,
-      user_id: data.user_id,
-      full_name: data.full_name,
-      role: (data.role as StaffRole) || "nurse",
-      department: data.department,
-      employee_id: data.employee_id,
-      hospital_id: data.hospital_id,
-      avatar_url: data.avatar_url,
-      hospital_name: hospitalName,
-    });
+    // Mocked out
   };
 
   const refreshProfile = async () => {
-    if (user) await fetchProfile(user.id);
+    // Mocked out
+  };
+
+  const signInAsDemo = () => {
+    setUser({
+      id: "mock-user-123",
+      email: "demo@quantumhealth.com",
+      app_metadata: {},
+      user_metadata: {},
+      aud: "authenticated",
+      created_at: new Date().toISOString()
+    } as User);
+    
+    setSession({
+      access_token: "mock-token",
+      token_type: "bearer",
+      expires_in: 3600,
+      expires_at: 10000000000,
+      refresh_token: "mock-refresh",
+      user: { id: "mock-user-123" } as User
+    });
+    
+    setProfile({
+      id: "mock-profile-123",
+      user_id: "mock-user-123",
+      full_name: "Dr. Alex Demo",
+      role: "attending",
+      department: "Intensive Care Unit",
+      employee_id: "QH-1001",
+      hospital_id: "hosp-demo",
+      avatar_url: null,
+      hospital_name: "Quantum Health Medical Center",
+    });
   };
 
   useEffect(() => {
-    // IMPORTANT: Set up listener BEFORE getSession to avoid missing events
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          // Fire and forget - never await inside onAuthStateChange
-          fetchProfile(session.user.id).then(() => setLoading(false));
-        } else {
-          setProfile(null);
-          setLoading(false);
-        }
-      }
-    );
-
-    // Restore session from storage
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id).then(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    // Auto-login disabled so user can see auth pages
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
     setProfile(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, signOut, refreshProfile, signInAsDemo }}>
       {children}
     </AuthContext.Provider>
   );

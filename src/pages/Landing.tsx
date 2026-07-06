@@ -3,7 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Shield, Activity, Brain, Zap, Clock, ArrowRight, ChevronRight, CheckCircle2 } from "lucide-react";
-import { useRef } from "react";
+import { Logo } from "@/components/ui/Logo";
+import { useRef, useState, useEffect, useMemo } from "react";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -13,6 +14,38 @@ export default function Landing() {
   const headerOpacity = useTransform(scrollY, [0, 50], [1, 0.9]);
   
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Typewriter effect
+  const words = useMemo(() => ["Modern ICUs.", "Critical Care.", "Rapid Response.", "Healthcare."], []);
+  const [currentWord, setCurrentWord] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loopNum, setLoopNum] = useState(0);
+  const [typingSpeed, setTypingSpeed] = useState(100);
+
+  useEffect(() => {
+    const handleTyping = () => {
+      const i = loopNum % words.length;
+      const fullText = words[i];
+
+      setCurrentWord(
+        isDeleting
+          ? fullText.substring(0, currentWord.length - 1)
+          : fullText.substring(0, currentWord.length + 1)
+      );
+
+      setTypingSpeed(isDeleting ? 40 : 120);
+
+      if (!isDeleting && currentWord === fullText) {
+        setTimeout(() => setIsDeleting(true), 2000);
+      } else if (isDeleting && currentWord === "") {
+        setIsDeleting(false);
+        setLoopNum(loopNum + 1);
+      }
+    };
+
+    const timer = setTimeout(handleTyping, typingSpeed);
+    return () => clearTimeout(timer);
+  }, [currentWord, isDeleting, loopNum, typingSpeed, words]);
 
   return (
     <div className="min-h-screen bg-slate-50 selection:bg-blue-200 selection:text-blue-900 overflow-x-hidden font-sans">
@@ -28,254 +61,366 @@ export default function Landing() {
         style={{ y: headerY, opacity: headerOpacity }}
         className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 pt-4 pb-2"
       >
-        <div className="max-w-6xl mx-auto rounded-full bg-white/70 border border-slate-200/50 backdrop-blur-md shadow-sm px-6 py-3 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto rounded-full bg-white/80 border border-slate-200/60 backdrop-blur-xl shadow-sm px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
-            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-1.5 rounded-lg shadow-md shadow-blue-500/20">
-              <Shield className="h-5 w-5 text-white" strokeWidth={2.5} />
-            </div>
-            <span className="font-extrabold text-base tracking-tight text-slate-800 hidden sm:block">
-              QUANTUM<span className="text-blue-600">HEALTH</span>
+            <Logo size={28} />
+            <span style={{ fontFamily: "'Outfit', sans-serif" }} className="font-extrabold text-base tracking-tight text-slate-800 hidden sm:block ml-2">
+              SEPSIS<span className="text-blue-600">SENTINEL</span>
             </span>
           </div>
+
+          {/* Middle Typing Animation */}
+          <div className="hidden md:flex items-center absolute left-1/2 -translate-x-1/2 text-sm font-medium text-slate-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 italic font-serif pr-1 relative z-10 drop-shadow-sm font-semibold">{currentWord}</span>
+            <span className="w-0.5 h-4 bg-blue-500 animate-pulse rounded-full"></span>
+          </div>
+
           <div className="flex items-center gap-4">
-            <a href="#features" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors hidden sm:block">Technology</a>
-            {user ? (
-              <Button onClick={() => navigate("/dashboard")} className="rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10">
-                Dashboard <ArrowRight className="h-4 w-4 ml-1.5" />
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" className="rounded-full text-slate-600 hover:bg-slate-100 hidden sm:flex font-semibold" onClick={() => navigate("/login")}>
+                Sign In
               </Button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" className="rounded-full text-slate-600 hover:bg-slate-100 hidden sm:flex" onClick={() => navigate("/login")}>
-                  Sign In
-                </Button>
-                <Button onClick={() => navigate("/login")} className="rounded-full bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 transition-all">
-                  Get Started
-                </Button>
-              </div>
-            )}
+              <Button onClick={() => navigate("/register")} className="rounded-full bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 transition-all font-semibold px-5">
+                Get Started
+              </Button>
+            </div>
           </div>
         </div>
       </motion.nav>
 
-      {/* Hero Section */}
-      <section className="relative z-10 pt-40 pb-20 px-6 lg:pt-48 lg:pb-32 min-h-[90vh] flex flex-col justify-center" ref={containerRef}>
-        <div className="max-w-5xl mx-auto text-center">
+      {/* Crisp Minimalist Hero Section - Split Layout */}
+      <section className="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-12 min-h-screen flex flex-col items-center bg-slate-50 overflow-hidden" ref={containerRef}>
+        <div className="absolute top-[10%] left-1/4 -translate-x-1/2 w-[80vw] h-[80vw] rounded-full bg-blue-50/50 blur-[120px] pointer-events-none" />
+        
+        <div className="relative z-20 w-full max-w-7xl mx-auto px-6 mt-8 flex flex-col lg:flex-row items-center justify-between gap-12">
+          {/* Left Column: Typography & CTAs */}
+          <div className="flex-1 text-left flex flex-col items-start z-30">
+
+
+            {/* Massive Heading */}
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-slate-900 tracking-tight leading-[1.05]"
+              style={{ fontFamily: "'Overpass', sans-serif" }}
+            >
+              Precision Intelligence <br className="hidden lg:block"/> for <br className="lg:hidden"/>
+              <span className="inline-flex items-center mt-2 relative">
+                <span 
+                  className="text-blue-600 pr-2 relative z-10 drop-shadow-sm font-normal"
+                  style={{ fontFamily: "'Dancing Script', cursive", fontSize: "1.2em", lineHeight: "1.1" }}
+                >
+                  Modern ICUs.
+                </span>
+              </span>
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="text-lg lg:text-xl text-slate-500 max-w-xl mt-8 font-normal leading-relaxed"
+            >
+              Eradicate preventable deterioration. Our advanced ML pipeline detects sepsis up to <span className="font-semibold text-slate-800">4 hours before</span> traditional protocols.
+            </motion.p>
+            
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-10 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
+            >
+              <Button size="lg" className="w-full sm:w-auto rounded-full bg-slate-900 text-white hover:bg-slate-800 text-base px-8 py-7 shadow-xl shadow-slate-900/10 transition-all hover:scale-105 font-semibold" onClick={() => navigate(user ? "/dashboard" : "/login")}>
+                {user ? "Enter Workspace" : "Deploy Sentinel"} <ArrowRight className="h-5 w-5 ml-2" />
+              </Button>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-full bg-white/50 backdrop-blur-md text-slate-700 border-slate-200 hover:bg-white hover:text-slate-900 text-base px-8 py-7 transition-all shadow-sm font-semibold" onClick={() => navigate("/demo")}>
+                View Architecture
+              </Button>
+            </motion.div>
+          </div>
           
+          {/* Right Column: 3D SVG Composition */}
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full bg-white border border-slate-200 shadow-sm"
+            initial={{ opacity: 0, scale: 0.8, rotateY: 15 }} animate={{ opacity: 1, scale: 1, rotateY: 0 }} transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
+            className="flex-1 relative w-full aspect-square max-w-[500px] lg:max-w-[700px] hidden md:flex items-center justify-center perspective-[1000px]"
           >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            <span className="text-xs font-semibold tracking-wide text-slate-600 uppercase">Next-Gen Sepsis Detection</span>
-          </motion.div>
+            {/* Decorative Glow */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-200/40 to-indigo-300/30 rounded-full blur-[80px]" />
+            
+            {/* The 3D SVG Art */}
+            <svg viewBox="0 0 400 400" className="w-full h-full relative z-10 drop-shadow-2xl overflow-visible">
+              <defs>
+                <linearGradient id="grid-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.2" />
+                </linearGradient>
+                <linearGradient id="node-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#2563eb" />
+                  <stop offset="100%" stopColor="#6366f1" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
 
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-5xl sm:text-7xl lg:text-8xl font-black text-slate-900 tracking-tighter leading-[1.05]"
-          >
-            Detect Sepsis <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500">
-              Before It Strikes.
-            </span>
-          </motion.h1>
+              <g transform="translate(200, 200)">
+                {/* Rotating Base Grid (Isometric projection simulated via scale & skew) */}
+                <motion.g 
+                  animate={{ rotateZ: 360 }} 
+                  transition={{ duration: 60, ease: "linear", repeat: Infinity }}
+                  style={{ transformOrigin: "0 0" }}
+                >
+                  <g transform="scale(1, 0.5) rotate(45)">
+                    {[...Array(10)].map((_, i) => (
+                      <rect key={`h-${i}`} x="-150" y={-150 + i * 30} width="300" height="1" fill="url(#grid-grad)" opacity="0.3" />
+                    ))}
+                    {[...Array(10)].map((_, i) => (
+                      <rect key={`v-${i}`} x={-150 + i * 30} y="-150" width="1" height="300" fill="url(#grid-grad)" opacity="0.3" />
+                    ))}
+                  </g>
+                </motion.g>
 
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-8 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-medium leading-relaxed"
-          >
-            A real-time early warning system engineered for modern ICUs.
-            Anticipate clinical deterioration up to <strong className="text-slate-900 font-bold">4 hours</strong> earlier using quantum-inspired temporal ML.
-          </motion.p>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
-          >
-            <Button size="lg" className="rounded-full bg-slate-900 text-white hover:bg-slate-800 text-base px-8 py-6 h-auto shadow-xl shadow-slate-900/10 w-full sm:w-auto transition-transform hover:scale-105 active:scale-95" onClick={() => navigate(user ? "/dashboard" : "/login")}>
-              {user ? "Enter Workspace" : "Request Access"} <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-            <Button size="lg" variant="outline" className="rounded-full bg-white text-slate-700 border-slate-200 hover:bg-slate-50 text-base px-8 py-6 h-auto w-full sm:w-auto transition-transform hover:scale-105 active:scale-95" onClick={() => navigate("/demo")}>
-              <Activity className="h-5 w-5 mr-2 text-blue-600" /> Interactive Demo
-            </Button>
+                {/* Floating Central Neural Core */}
+                <motion.g
+                  animate={{ y: [-10, 10, -10] }}
+                  transition={{ duration: 6, ease: "easeInOut", repeat: Infinity }}
+                >
+                  {/* Outer Ring */}
+                  <motion.circle 
+                    r="80" fill="none" stroke="url(#grid-grad)" strokeWidth="2" strokeDasharray="10 5 4 5"
+                    animate={{ rotate: -360 }} transition={{ duration: 40, ease: "linear", repeat: Infinity }}
+                  />
+                  {/* Inner Ring */}
+                  <motion.circle 
+                    r="60" fill="none" stroke="url(#node-grad)" strokeWidth="1" strokeDasharray="40 10"
+                    animate={{ rotate: 360 }} transition={{ duration: 30, ease: "linear", repeat: Infinity }}
+                  />
+                  
+                  {/* Central Node */}
+                  <circle r="25" fill="url(#node-grad)" filter="url(#glow)" opacity="0.9" />
+                  <circle r="15" fill="#ffffff" opacity="0.5" />
+                  
+                  {/* Orbiting Satellites */}
+                  {[0, 120, 240].map((angle, index) => (
+                    <motion.g
+                      key={`sat-${index}`}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 15, ease: "linear", repeat: Infinity, delay: index * -5 }}
+                    >
+                      <g transform={`rotate(${angle})`}>
+                        <motion.circle 
+                          cx="90" cy="0" r="8" fill="url(#node-grad)" filter="url(#glow)"
+                          animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 2, repeat: Infinity, delay: index }}
+                        />
+                        <line x1="25" y1="0" x2="90" y2="0" stroke="url(#grid-grad)" strokeWidth="1" strokeDasharray="4 4" />
+                      </g>
+                    </motion.g>
+                  ))}
+                  
+                  {/* Floating geometric data blocks */}
+                  <motion.path 
+                    d="M-30,-50 L-10,-60 L10,-50 L-10,-40 Z" fill="url(#node-grad)" opacity="0.7"
+                    animate={{ y: [0, -15, 0], rotate: [0, 10, 0] }} transition={{ duration: 4, ease: "easeInOut", repeat: Infinity }}
+                  />
+                  <motion.path 
+                    d="M40,30 L60,20 L80,30 L60,40 Z" fill="url(#grid-grad)" opacity="0.6"
+                    animate={{ y: [0, 20, 0], rotate: [0, -15, 0] }} transition={{ duration: 5, ease: "easeInOut", repeat: Infinity, delay: 1 }}
+                  />
+                  <motion.path 
+                    d="M-60,10 L-40,0 L-20,10 L-40,20 Z" fill="#60a5fa" opacity="0.8" filter="url(#glow)"
+                    animate={{ y: [0, -25, 0], scale: [1, 1.2, 1] }} transition={{ duration: 7, ease: "easeInOut", repeat: Infinity, delay: 2 }}
+                  />
+                </motion.g>
+              </g>
+            </svg>
           </motion.div>
         </div>
 
-        {/* Dashboard Mockup / Floating Graphic */}
+        {/* Operational Metrics Line */}
         <motion.div 
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="mt-20 max-w-5xl mx-auto relative perspective-1000"
+          initial={{ opacity: 0, y: 20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="w-full mt-24 lg:mt-32 mb-10 relative z-10 px-6 flex justify-center"
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent z-10 top-1/2 rounded-b-3xl pointer-events-none" />
-          <div className="bg-white p-2 rounded-2xl border border-slate-200/60 shadow-2xl shadow-slate-200/50 backdrop-blur-xl transform rotate-x-[5deg] hover:rotate-x-0 transition-transform duration-700">
-            <div className="rounded-xl border border-slate-100 bg-slate-50/50 overflow-hidden relative">
-               <div className="flex items-center gap-1.5 px-4 py-3 border-b border-slate-100 bg-white">
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-               </div>
-               <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                 {/* Mock UI elements */}
-                 <div className="space-y-4">
-                    <div className="h-4 w-24 bg-slate-200 rounded-full" />
-                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full w-2/3 bg-blue-500 rounded-full" />
-                    </div>
-                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full w-1/3 bg-emerald-400 rounded-full" />
-                    </div>
-                 </div>
-                 <div className="col-span-2 space-y-3">
-                    <div className="flex gap-4">
-                      <div className="h-20 w-1/3 bg-white border border-slate-100 rounded-lg shadow-sm flex items-center justify-center p-4">
-                        <div className="w-full">
-                          <div className="h-3 w-12 bg-slate-200 rounded-full mb-3" />
-                          <div className="h-6 w-16 bg-slate-800 rounded-full" />
-                        </div>
-                      </div>
-                      <div className="h-20 w-1/3 bg-blue-50 border border-blue-100 rounded-lg shadow-sm flex items-center justify-center p-4">
-                        <div className="w-full">
-                          <div className="h-3 w-12 bg-blue-200 rounded-full mb-3" />
-                          <div className="h-6 w-16 bg-blue-600 rounded-full" />
-                        </div>
-                      </div>
-                      <div className="h-20 w-1/3 bg-red-50 border border-red-100 rounded-lg shadow-sm flex items-center justify-center p-4 relative overflow-hidden">
-                        <div className="absolute right-0 top-0 bottom-0 w-8 bg-red-100/50" />
-                        <div className="w-full relative z-10">
-                          <div className="h-3 w-12 bg-red-200 rounded-full mb-3" />
-                          <div className="h-6 w-16 bg-red-600 rounded-full" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="h-32 w-full bg-white border border-slate-100 rounded-lg shadow-sm p-4 relative overflow-hidden">
-                      {/* Fake sine wave */}
-                      <svg viewBox="0 0 100 20" className="w-full h-full absolute inset-0 opacity-20" preserveAspectRatio="none">
-                        <path d="M0,10 Q10,0 20,10 T40,10 T60,10 T80,10 T100,10" fill="none" stroke="#2563eb" strokeWidth="2" />
-                        <path d="M0,15 Q10,5 20,15 T40,15 T60,15 T80,15 T100,15" fill="none" stroke="#10b981" strokeWidth="1" />
-                      </svg>
-                    </div>
-                 </div>
-               </div>
+          <div className="inline-flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12 py-5 px-10 rounded-2xl sm:rounded-full bg-white/60 border border-slate-200/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 ring-1 ring-blue-100/50">
+                <Activity className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-2xl font-black text-slate-900 tracking-tight font-sora">240+</span>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Active ICUs</span>
+              </div>
+            </div>
+            
+            <div className="hidden sm:block w-px h-12 bg-slate-200/80" />
+            
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 ring-1 ring-emerald-100/50">
+                <Shield className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-2xl font-black text-slate-900 tracking-tight font-sora">1.2M+</span>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Lives Protected</span>
+              </div>
+            </div>
+
+            <div className="hidden sm:block w-px h-12 bg-slate-200/80" />
+            
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center shrink-0 ring-1 ring-indigo-100/50">
+                <Zap className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-2xl font-black text-slate-900 tracking-tight font-sora">99.9%</span>
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Uptime SLA</span>
+              </div>
             </div>
           </div>
         </motion.div>
       </section>
 
       {/* Bento Grid Features */}
-      <section id="features" className="relative z-10 py-24 px-6 bg-white border-t border-slate-100">
+      <section id="features" className="relative z-10 py-32 px-6 bg-slate-50/50 border-t border-slate-100 overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent" />
         <div className="max-w-6xl mx-auto">
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="text-center max-w-2xl mx-auto mb-16 space-y-4"
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }}
+            className="text-center max-w-2xl mx-auto mb-20 space-y-4"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Intelligence at every layer.</h2>
-            <p className="text-slate-500 font-medium text-lg">Our 5-stage pipeline combines raw clinical data with quantum-inspired risk assessment to prevent critical deterioration.</p>
+            <h2 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter font-sora">Intelligence at every layer.</h2>
+            <p className="text-slate-500 font-medium text-xl leading-relaxed">Our 5-stage pipeline combines raw clinical data with quantum-inspired risk assessment to prevent critical deterioration.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
-            {/* Large Bento Box */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 auto-rows-[350px]">
+            {/* Large Bento Box: Deep Temporal Extraction */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-              className="md:col-span-2 row-span-1 rounded-3xl bg-slate-50 border border-slate-100 overflow-hidden relative group"
+              initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: 0.1, duration: 0.6 }}
+              whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)" }}
+              className="md:col-span-2 row-span-1 rounded-[2.5rem] bg-white border border-slate-200 overflow-hidden relative group shadow-xl shadow-slate-200/40"
             >
-              <div className="absolute top-0 right-0 p-8 w-1/2 h-full opacity-10 group-hover:opacity-20 transition-opacity flex items-center justify-center">
-                <Brain className="w-full h-full text-blue-600" />
+              {/* 3D SVG Background Element */}
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] pointer-events-none transform translate-x-1/4 -translate-y-1/4 group-hover:scale-105 transition-transform duration-700">
+                <svg viewBox="0 0 200 200" className="w-full h-full opacity-30">
+                  <defs>
+                    <linearGradient id="wave-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#3b82f6" />
+                      <stop offset="100%" stopColor="#8b5cf6" />
+                    </linearGradient>
+                  </defs>
+                  <motion.g animate={{ rotate: 360 }} transition={{ duration: 50, repeat: Infinity, ease: "linear" }} style={{ transformOrigin: "center" }}>
+                    {[...Array(6)].map((_, i) => (
+                      <motion.circle key={i} cx="100" cy="100" r={40 + i * 15} fill="none" stroke="url(#wave-grad)" strokeWidth="1" strokeDasharray={`${5 + i * 2} ${10 + i * 2}`} opacity={1 - (i * 0.15)} />
+                    ))}
+                  </motion.g>
+                </svg>
               </div>
-              <div className="relative z-10 p-8 h-full flex flex-col justify-end">
-                <div className="bg-white/80 backdrop-blur shadow-sm border border-slate-200 p-2 rounded-xl w-12 h-12 flex items-center justify-center mb-6">
-                  <Activity className="h-6 w-6 text-blue-600" />
+
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent" />
+              
+              <div className="relative z-10 p-10 h-full flex flex-col justify-end">
+                <div className="bg-white/80 backdrop-blur shadow-sm border border-slate-200 p-3 rounded-2xl w-14 h-14 flex items-center justify-center mb-6">
+                  <Activity className="h-7 w-7 text-blue-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Deep Temporal Extraction</h3>
-                <p className="text-slate-600 max-w-md">Our LSTM architecture processes 15-minute intervals, capturing subtle patient trajectory shifts completely invisible to standard scoring systems.</p>
+                <h3 className="text-3xl font-bold text-slate-900 mb-3 font-sora">Deep Temporal Extraction</h3>
+                <p className="text-slate-600 text-lg max-w-lg leading-relaxed">Our LSTM architecture processes 15-minute intervals, capturing subtle patient trajectory shifts completely invisible to standard scoring systems.</p>
               </div>
             </motion.div>
 
-            {/* Small Bento Box 1 */}
+            {/* Small Bento Box 1: Predictive ML */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="md:col-span-1 row-span-1 rounded-3xl bg-indigo-50 border border-indigo-100 overflow-hidden relative group"
+              initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: 0.2, duration: 0.6 }}
+              whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(79, 70, 229, 0.15)" }}
+              className="md:col-span-1 row-span-1 rounded-[2.5rem] bg-indigo-600 border border-indigo-500 overflow-hidden relative group shadow-xl shadow-indigo-600/20 text-white"
             >
-              <div className="relative z-10 p-8 h-full flex flex-col justify-between">
-                <div className="bg-white p-2 rounded-xl w-12 h-12 shadow-sm flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-indigo-600" />
+              {/* 3D SVG Grid element */}
+              <div className="absolute inset-0 opacity-20">
+                <svg viewBox="0 0 100 100" width="100%" height="100%">
+                  <pattern id="isometric" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="scale(2) rotate(45)">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="white" strokeWidth="1" />
+                  </pattern>
+                  <rect width="100%" height="100%" fill="url(#isometric)" />
+                </svg>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/80 to-transparent mix-blend-multiply" />
+
+              <div className="relative z-10 p-10 h-full flex flex-col justify-between">
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 p-3 rounded-2xl w-14 h-14 flex items-center justify-center">
+                  <Zap className="h-7 w-7 text-indigo-100" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-indigo-900 mb-2">Quantum Scoring</h3>
-                  <p className="text-indigo-700 text-sm">Variational quantum circuits evaluate multi-dimensional risk instantly.</p>
+                  <h3 className="text-2xl font-bold text-white mb-2 font-sora">Predictive ML</h3>
+                  <p className="text-indigo-100/80 text-base leading-relaxed">Neural circuits evaluate multi-dimensional risk instantly.</p>
                 </div>
               </div>
             </motion.div>
 
-            {/* Small Bento Box 2 */}
+            {/* Small Bento Box 2: Safety Tripwires */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="md:col-span-1 row-span-1 rounded-3xl bg-emerald-50 border border-emerald-100 overflow-hidden relative group"
+              initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: 0.3, duration: 0.6 }}
+              whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(16, 185, 129, 0.15)" }}
+              className="md:col-span-1 row-span-1 rounded-[2.5rem] bg-emerald-50 border border-emerald-100 overflow-hidden relative group shadow-xl shadow-slate-200/40"
             >
-              <div className="relative z-10 p-8 h-full flex flex-col justify-between">
-                <div className="bg-white p-2 rounded-xl w-12 h-12 shadow-sm flex items-center justify-center">
-                  <Shield className="h-6 w-6 text-emerald-600" />
+              {/* 3D SVG Shield Element */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-10 pointer-events-none">
+                <svg viewBox="0 0 100 100" className="w-full h-full group-hover:scale-110 transition-transform duration-700">
+                  <motion.path d="M50 10 L90 30 L90 60 C90 80 50 95 50 95 C50 95 10 80 10 60 L10 30 Z" fill="none" stroke="#059669" strokeWidth="2" strokeDasharray="5 5" animate={{ rotateY: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} style={{ transformOrigin: "center" }} />
+                </svg>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/80" />
+
+              <div className="relative z-10 p-10 h-full flex flex-col justify-between">
+                <div className="bg-emerald-100/80 backdrop-blur-sm border border-emerald-200 p-3 rounded-2xl w-14 h-14 flex items-center justify-center shadow-sm">
+                  <Shield className="h-7 w-7 text-emerald-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-emerald-900 mb-2">Safety Tripwires</h3>
-                  <p className="text-emerald-700 text-sm">Hardcoded clinical thresholds override ML models to prevent edge-case failures.</p>
+                  <h3 className="text-2xl font-bold text-emerald-950 mb-2 font-sora">Safety Tripwires</h3>
+                  <p className="text-emerald-800/80 text-base leading-relaxed">Hardcoded clinical thresholds override ML models to prevent edge-case failures.</p>
                 </div>
               </div>
             </motion.div>
 
-            {/* Large Bento Box 2 */}
+            {/* Large Bento Box 2: Automated Orchestrator */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="md:col-span-2 row-span-1 rounded-3xl bg-slate-900 text-white overflow-hidden relative group"
+              initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ delay: 0.4, duration: 0.6 }}
+              whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.1)" }}
+              className="md:col-span-2 row-span-1 rounded-[2.5rem] bg-white border border-slate-200 overflow-hidden relative group shadow-xl shadow-slate-200/40"
             >
-               <div className="absolute inset-0 bg-gradient-to-tr from-slate-900 to-blue-900" />
-               <div className="relative z-10 p-8 h-full flex flex-col justify-center">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <div>
-                    <div className="bg-white/10 p-2 rounded-xl w-12 h-12 flex items-center justify-center mb-6">
-                      <Clock className="h-6 w-6 text-white" />
+               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-white opacity-80" />
+               <div className="relative z-10 p-10 h-full flex flex-col justify-center">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-8 items-center h-full">
+                  <div className="md:col-span-3 h-full flex flex-col justify-between">
+                    <div className="bg-blue-50 border border-blue-100 p-3 rounded-2xl w-14 h-14 shadow-sm flex items-center justify-center mb-6">
+                      <Clock className="h-7 w-7 text-blue-600" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">Automated Orchestrator</h3>
-                    <p className="text-slate-300">Translates complex AI scoring into immediate clinical action paths: Watch, Amber, or Critical protocols.</p>
+                    <div>
+                      <h3 className="text-3xl font-bold text-slate-900 mb-3 font-sora">Automated Orchestrator</h3>
+                      <p className="text-slate-600 text-lg leading-relaxed max-w-sm">Translates complex AI scoring into immediate clinical action paths: Watch, Amber, or Critical protocols.</p>
+                    </div>
                   </div>
-                  <div className="flex flex-col justify-center space-y-3">
-                    <div className="flex items-center gap-3 bg-white/5 rounded-lg p-3 border border-white/10">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      <span className="text-sm font-medium">Reduced false positives</span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white/5 rounded-lg p-3 border border-white/10">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      <span className="text-sm font-medium">15-minute reporting cycle</span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white/5 rounded-lg p-3 border border-white/10">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      <span className="text-sm font-medium">EMR Integration Ready</span>
-                    </div>
+                  
+                  {/* Floating Action Cards */}
+                  <div className="md:col-span-2 flex flex-col gap-4 relative">
+                    <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="flex items-center gap-4 bg-white/90 backdrop-blur-xl border border-slate-200 p-4 rounded-2xl shadow-lg shadow-slate-200/50">
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <span className="font-semibold text-slate-800 text-sm">Reduced false positives</span>
+                    </motion.div>
+                    
+                    <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="flex items-center gap-4 bg-white/90 backdrop-blur-xl border border-slate-200 p-4 rounded-2xl shadow-lg shadow-slate-200/50 -ml-4">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <span className="font-semibold text-slate-800 text-sm">15-minute reporting cycle</span>
+                    </motion.div>
+                    
+                    <motion.div animate={{ y: [0, -3, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 2 }} className="flex items-center gap-4 bg-white/90 backdrop-blur-xl border border-slate-200 p-4 rounded-2xl shadow-lg shadow-slate-200/50">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                        <CheckCircle2 className="w-5 h-5 text-indigo-600" />
+                      </div>
+                      <span className="font-semibold text-slate-800 text-sm">EMR Integration Ready</span>
+                    </motion.div>
                   </div>
                 </div>
               </div>
@@ -285,21 +430,21 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-24 px-6 overflow-hidden bg-slate-50">
-        <div className="absolute inset-0 bg-blue-600/5 [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]" />
+      <section className="relative py-24 px-6 overflow-hidden bg-slate-50 border-t border-slate-100">
+        <div className="absolute inset-0 bg-blue-50/50 [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]" />
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-12 border border-slate-100"
+            className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 p-12 border border-slate-100 ring-1 ring-slate-100"
           >
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Empower your clinical staff today.</h2>
             <p className="text-slate-600 mb-8 max-w-lg mx-auto">
-              Join leading intensive care units using QuantumHealth to reduce mortality rates and optimize workflows.
+              Join leading intensive care units using Sepsis Sentinel to reduce mortality rates and optimize workflows.
             </p>
-            <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-10 py-6 h-auto text-base shadow-lg shadow-blue-600/20 hover:scale-105 transition-transform" onClick={() => navigate(user ? "/dashboard" : "/login")}>
+            <Button size="lg" className="rounded-full bg-blue-600 hover:bg-blue-700 text-white px-10 py-6 h-auto text-base shadow-lg shadow-blue-600/20 hover:scale-105 transition-transform font-semibold" onClick={() => navigate(user ? "/dashboard" : "/login")}>
               {user ? "Open Workspace" : "Begin Free Trial"} <ChevronRight className="w-5 h-5 ml-1" />
             </Button>
           </motion.div>
@@ -307,13 +452,13 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 py-10 px-6">
+      <footer className="bg-white py-10 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-blue-600" />
-            <span className="font-bold text-slate-900">QuantumHealth</span>
+            <Logo size={24} />
+            <span style={{ fontFamily: "'Outfit', sans-serif" }} className="font-bold text-slate-900">Sepsis Sentinel</span>
           </div>
-          <p className="text-sm text-slate-500">© {new Date().getFullYear()} QuantumHealth AI Systems. All rights reserved.</p>
+          <p className="text-sm text-slate-500">© {new Date().getFullYear()} Sepsis Sentinel. All rights reserved.</p>
           <div className="flex gap-4">
             <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">HIPAA Compliant</span>
             <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">ISO 27001</span>
