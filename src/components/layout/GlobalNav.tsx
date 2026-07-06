@@ -91,6 +91,15 @@ export function GlobalNav() {
             </div>
           ) : (
             <>
+              <Button 
+                variant="outline"
+                size="sm"
+                className="hidden sm:flex text-xs font-semibold rounded-full bg-white/50 backdrop-blur-md text-slate-700 border-slate-200 hover:bg-white hover:text-slate-900 h-8 px-4 ml-1 transition-all shadow-sm"
+                onClick={() => navigate("/demo")}
+              >
+                <Play className="w-3 h-3 mr-1.5 fill-current" /> Demo
+              </Button>
+              
               <div className="hidden lg:flex items-center gap-3 ml-2">
                 <div className="flex flex-col items-end">
                   <span className="text-[11px] font-bold text-slate-900 leading-none">
