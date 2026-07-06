@@ -243,10 +243,10 @@ const PatientDetail = () => {
                             initial={{ x: -20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             transition={{ delay: idx * 0.1 }}
-                            className="flex justify-between items-center text-xs font-mono text-red-900 bg-white p-2.5 rounded-lg border border-red-100 shadow-sm"
+                            className="flex justify-between items-start gap-2 text-xs font-mono text-red-900 bg-white p-2.5 rounded-lg border border-red-100 shadow-sm min-w-0"
                           >
-                            <span className="font-semibold">{tw.name}</span>
-                            <span className="opacity-80 text-right">{tw.value.toFixed(1)} — {tw.reason}</span>
+                            <span className="font-semibold break-words flex-1 min-w-0">{tw.name}</span>
+                            <span className="opacity-80 text-right shrink-0 max-w-[50%] break-words">{tw.value.toFixed(1)} — {tw.reason}</span>
                           </motion.div>
                         ))}
                     </div>
@@ -278,9 +278,9 @@ const PatientDetail = () => {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.05 }}
-                          className="text-xs font-mono text-blue-900 flex items-start gap-2 bg-white p-2.5 rounded border border-blue-100 shadow-sm"
+                          className="text-xs font-mono text-blue-900 flex items-start gap-2 bg-white p-2.5 rounded border border-blue-100 shadow-sm min-w-0"
                         >
-                          <span className="text-blue-600 mt-0.5">▸</span> {a}
+                          <span className="text-blue-600 mt-0.5 shrink-0">▸</span> <span className="break-words flex-1 min-w-0">{a}</span>
                         </motion.div>
                       ))}
                     </div>

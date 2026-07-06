@@ -178,16 +178,17 @@ export function CXRUploadPanel() {
               <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
                 Sepsis-Relevant Findings
               </p>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 min-w-0">
                 {Object.entries(result.sepsis_relevant_findings).map(([name, score]) => (
-                  <div key={name} className="flex items-center justify-between text-xs font-mono">
+                  <div key={name} className="flex items-center justify-between text-xs font-mono min-w-0 gap-2">
                     <span className={cn(
-                      score > 0.5 ? "text-red-300" : score > 0.3 ? "text-amber-300" : "text-muted-foreground"
+                      score > 0.5 ? "text-red-300" : score > 0.3 ? "text-amber-300" : "text-muted-foreground",
+                      "truncate flex-1"
                     )}>
                       {name}
                     </span>
                     <span className={cn(
-                      "font-bold",
+                      "font-bold shrink-0",
                       score > 0.5 ? "text-red-400" : score > 0.3 ? "text-amber-400" : "text-muted-foreground"
                     )}>
                       {(score * 100).toFixed(0)}%
@@ -198,10 +199,10 @@ export function CXRUploadPanel() {
             </div>
 
             {/* Interpretation */}
-            <div className="p-3 rounded-lg border border-border bg-card">
+            <div className="p-3 rounded-lg border border-border bg-card min-w-0">
               <div className="flex items-start gap-2">
                 <Stethoscope className="h-3.5 w-3.5 text-blue-400 mt-0.5 shrink-0" />
-                <p className="text-xs text-foreground leading-relaxed">{result.interpretation}</p>
+                <p className="text-xs text-foreground leading-relaxed break-words flex-1 min-w-0">{result.interpretation}</p>
               </div>
             </div>
 
@@ -218,16 +219,16 @@ export function CXRUploadPanel() {
             {expanded && (
               <div className="space-y-1 max-h-48 overflow-y-auto">
                 {result.top_findings.map((f) => (
-                  <div key={f.finding} className="flex items-center justify-between text-xs font-mono px-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className={f.sepsis_relevant ? "text-blue-300" : "text-muted-foreground"}>
+                  <div key={f.finding} className="flex items-center justify-between text-xs font-mono px-1 gap-2 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                      <span className={cn(f.sepsis_relevant ? "text-blue-300" : "text-muted-foreground", "truncate")}>
                         {f.finding}
                       </span>
                       {f.sepsis_relevant && (
-                        <span className="text-[8px] text-blue-500">[SEPSIS]</span>
+                        <span className="text-[8px] text-blue-500 shrink-0">[SEPSIS]</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <Badge variant="outline" className={cn("text-[8px] h-4 px-1", severityBadge(f.severity))}>
                         {f.severity}
                       </Badge>

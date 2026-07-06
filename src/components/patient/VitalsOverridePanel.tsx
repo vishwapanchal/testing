@@ -134,7 +134,7 @@ export function VitalsOverridePanel({ initialVitals, onVitalsChange }: VitalsOve
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Demographics */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
           <VitalSlider icon={<Activity className="h-3 w-3" />} label="Age" unit="yrs" value={vitals.age} min={18} max={100} step={1} onChange={(v) => updateVital("age", v)} />
           <div>
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mb-1.5">

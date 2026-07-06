@@ -150,16 +150,16 @@ export function HITLActionPanel({ tier, isCriticalOverride, patientName }: HITLA
                 <div
                   key={i}
                   className={cn(
-                    "flex items-center gap-2 text-xs font-mono py-1 px-2 rounded-md",
+                    "flex items-start gap-2 text-xs font-mono py-1 px-2 rounded-md min-w-0",
                     acknowledged ? "text-foreground/60 bg-tier-watch/5" : "text-foreground/80"
                   )}
                 >
                   {acknowledged ? (
-                    <CheckCircle className="h-3 w-3 text-tier-watch shrink-0" />
+                    <CheckCircle className="h-3 w-3 text-tier-watch shrink-0 mt-0.5" />
                   ) : (
-                    <span className="h-3 w-3 flex items-center justify-center text-[9px] text-muted-foreground shrink-0">{i + 1}</span>
+                    <span className="h-3 w-3 flex items-center justify-center text-[9px] text-muted-foreground shrink-0 mt-0.5">{i + 1}</span>
                   )}
-                  <span>{step}</span>
+                  <span className="break-words flex-1 min-w-0">{step}</span>
                 </div>
               ))}
             </div>
@@ -169,13 +169,13 @@ export function HITLActionPanel({ tier, isCriticalOverride, patientName }: HITLA
           {action.requiresApproval && (
             <div className="border-t border-border pt-3">
               {acknowledged ? (
-                <div className="flex items-center gap-2 p-3 rounded-lg border border-tier-watch/30 bg-tier-watch/5">
-                  <CheckCircle className="h-4 w-4 text-tier-watch" />
-                  <div>
-                    <p className="text-xs font-mono font-bold text-tier-watch">
+                <div className="flex items-center gap-2 p-3 rounded-lg border border-tier-watch/30 bg-tier-watch/5 min-w-0">
+                  <CheckCircle className="h-4 w-4 text-tier-watch shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-mono font-bold text-tier-watch truncate">
                       Acknowledged by {profile?.full_name ?? "Staff"}
                     </p>
-                    <p className="text-[10px] font-mono text-muted-foreground">
+                    <p className="text-[10px] font-mono text-muted-foreground truncate">
                       {acknowledgedAt?.toLocaleTimeString()} — Protocol in progress
                     </p>
                   </div>
@@ -194,9 +194,9 @@ export function HITLActionPanel({ tier, isCriticalOverride, patientName }: HITLA
                   Acknowledge & Approve Protocol
                 </Button>
               ) : (
-                <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-secondary/50">
-                  <ShieldAlert className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-xs font-mono text-muted-foreground">
+                <div className="flex items-center gap-2 p-3 rounded-lg border border-border bg-secondary/50 min-w-0">
+                  <ShieldAlert className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <p className="text-xs font-mono text-muted-foreground break-words flex-1 min-w-0">
                     Awaiting attending approval — only attending/admin can authorize
                   </p>
                 </div>
@@ -220,9 +220,9 @@ export function HITLActionPanel({ tier, isCriticalOverride, patientName }: HITLA
           </DialogHeader>
           <div className="space-y-2 mt-2">
             {action.steps.map((step, i) => (
-              <div key={i} className="flex items-center gap-2 text-xs font-mono text-foreground/80">
-                <span className="text-[10px] text-muted-foreground">{i + 1}.</span>
-                {step}
+              <div key={i} className="flex items-start gap-2 text-xs font-mono text-foreground/80 min-w-0">
+                <span className="text-[10px] text-muted-foreground shrink-0 mt-0.5">{i + 1}.</span>
+                <span className="break-words flex-1 min-w-0">{step}</span>
               </div>
             ))}
           </div>
