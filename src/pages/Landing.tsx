@@ -1,16 +1,51 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Shield, Activity, Brain, Zap, Clock, ArrowRight, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
-import { useRef } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 
 export default function Landing() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { scrollY } = useScroll();
+  const headerY = useTransform(scrollY, [0, 50], [0, -10]);
+  const headerOpacity = useTransform(scrollY, [0, 50], [1, 0.9]);
   
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Typewriter effect
+  const words = useMemo(() => ["Modern ICUs.", "Critical Care.", "Rapid Response.", "Healthcare."], []);
+  const [currentWord, setCurrentWord] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loopNum, setLoopNum] = useState(0);
+  const [typingSpeed, setTypingSpeed] = useState(100);
+
+  useEffect(() => {
+    const handleTyping = () => {
+      const i = loopNum % words.length;
+      const fullText = words[i];
+
+      setCurrentWord(
+        isDeleting
+          ? fullText.substring(0, currentWord.length - 1)
+          : fullText.substring(0, currentWord.length + 1)
+      );
+
+      setTypingSpeed(isDeleting ? 40 : 120);
+
+      if (!isDeleting && currentWord === fullText) {
+        setTimeout(() => setIsDeleting(true), 2000);
+      } else if (isDeleting && currentWord === "") {
+        setIsDeleting(false);
+        setLoopNum(loopNum + 1);
+      }
+    };
+
+    const timer = setTimeout(handleTyping, typingSpeed);
+    return () => clearTimeout(timer);
+  }, [currentWord, isDeleting, loopNum, typingSpeed, words]);
 
   return (
     <div className="min-h-screen bg-slate-50 selection:bg-blue-200 selection:text-blue-900 overflow-x-hidden font-sans">
@@ -20,6 +55,38 @@ export default function Landing() {
         <div className="absolute -top-[20%] -left-[10%] w-[50%] aspect-square rounded-full bg-blue-100/40 blur-[100px]" />
         <div className="absolute top-[20%] -right-[10%] w-[40%] aspect-square rounded-full bg-emerald-100/30 blur-[120px]" />
       </div>
+
+      {/* Floating Header */}
+      <motion.nav 
+        style={{ y: headerY, opacity: headerOpacity }}
+        className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 pt-4 pb-2"
+      >
+        <div className="max-w-6xl mx-auto rounded-full bg-white/80 border border-slate-200/60 backdrop-blur-xl shadow-sm px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo(0,0)}>
+            <Logo size={28} />
+            <span style={{ fontFamily: "'Outfit', sans-serif" }} className="font-extrabold text-base tracking-tight text-slate-800 hidden sm:block ml-2">
+              SEPSIS<span className="text-blue-600">SENTINEL</span>
+            </span>
+          </div>
+
+          {/* Middle Typing Animation */}
+          <div className="hidden md:flex items-center absolute left-1/2 -translate-x-1/2 text-sm font-medium text-slate-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 italic font-serif pr-1 relative z-10 drop-shadow-sm font-semibold">{currentWord}</span>
+            <span className="w-0.5 h-4 bg-blue-500 animate-pulse rounded-full"></span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" className="rounded-full text-slate-600 hover:bg-slate-100 hidden sm:flex font-semibold" onClick={() => navigate("/login")}>
+                Sign In
+              </Button>
+              <Button onClick={() => navigate("/register")} className="rounded-full bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/20 transition-all font-semibold px-5">
+                Get Started
+              </Button>
+            </div>
+          </div>
+        </div>
+      </motion.nav>
 
       {/* Crisp Minimalist Hero Section - Split Layout */}
       <section className="relative z-10 pt-32 pb-20 lg:pt-48 lg:pb-12 min-h-[calc(100vh-5rem)] flex flex-col items-center bg-slate-50 overflow-hidden" ref={containerRef}>
@@ -49,7 +116,7 @@ export default function Landing() {
             
             <motion.p 
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="text-lg lg:text-xl text-slate-500 max-w-xl mt-8 font-normal leading-relaxed break-words"
+              className="text-lg lg:text-xl text-slate-500 max-w-xl mt-8 font-normal leading-relaxed"
             >
               Eradicate preventable deterioration. Our advanced ML pipeline detects sepsis up to <span className="font-semibold text-slate-800">4 hours before</span> traditional protocols.
             </motion.p>
