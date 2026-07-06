@@ -143,105 +143,136 @@ export default function Landing() {
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-200/40 to-indigo-300/30 rounded-full blur-[80px]" />
             
             {/* The Abstract ICU Monitor Graphic */}
-            <svg viewBox="0 0 400 400" className="w-full h-full relative z-10 drop-shadow-2xl overflow-visible">
+            <svg viewBox="0 0 500 500" className="w-full h-full relative z-10 drop-shadow-2xl overflow-visible">
               <defs>
-                <linearGradient id="monitor-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                {/* Mesh Gradient Background Elements */}
+                <radialGradient id="glow-blue" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id="glow-emerald" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id="glow-indigo" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+                </radialGradient>
+
+                {/* Card Material */}
+                <linearGradient id="glass-card" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#f8fafc" stopOpacity="0.95" />
+                  <stop offset="100%" stopColor="#f8fafc" stopOpacity="0.5" />
                 </linearGradient>
-                <linearGradient id="screen-bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#0f172a" />
-                  <stop offset="100%" stopColor="#1e293b" />
+
+                <linearGradient id="glass-border" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0.2" />
+                </linearGradient>
+
+                {/* Line Gradients */}
+                <linearGradient id="trend-line" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.1" />
+                  <stop offset="50%" stopColor="#6366f1" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1" />
                 </linearGradient>
                 <linearGradient id="ekg-line" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0" />
-                  <stop offset="20%" stopColor="#3b82f6" stopOpacity="1" />
-                  <stop offset="80%" stopColor="#8b5cf6" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.1" />
+                  <stop offset="30%" stopColor="#10b981" stopOpacity="1" />
+                  <stop offset="70%" stopColor="#3b82f6" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1" />
                 </linearGradient>
-                <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-                  <feDropShadow dx="0" dy="15" stdDeviation="15" floodOpacity="0.05" />
+
+                <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="20" stdDeviation="25" floodColor="#0f172a" floodOpacity="0.08" />
                 </filter>
-                <filter id="glow-strong">
-                  <feGaussianBlur stdDeviation="4" result="blur" />
+                
+                <filter id="glass-blur">
+                  <feGaussianBlur stdDeviation="12" result="blur" />
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
               </defs>
 
-              <g transform="translate(40, 60)">
-                {/* Monitor Frame */}
-                <rect x="0" y="0" width="320" height="220" rx="24" fill="url(#monitor-bg)" filter="url(#shadow)" stroke="#e2e8f0" strokeWidth="1" />
-                
-                {/* Inner Screen */}
-                <rect x="15" y="15" width="290" height="190" rx="12" fill="url(#screen-bg)" />
-                
-                {/* Grid on screen */}
-                <g stroke="#334155" strokeWidth="1" opacity="0.3">
-                  {[...Array(6)].map((_, i) => (
-                    <line key={`h-${i}`} x1="15" y1={45 + i * 30} x2="305" y2={45 + i * 30} />
-                  ))}
-                  {[...Array(9)].map((_, i) => (
-                    <line key={`v-${i}`} x1={45 + i * 30} y1="15" x2={45 + i * 30} y2="205" />
-                  ))}
-                </g>
+              {/* Background Ambient Orbs */}
+              <motion.circle cx="150" cy="150" r="180" fill="url(#glow-blue)" animate={{ x: [-20, 20, -20], y: [-20, 30, -20] }} transition={{ duration: 10, ease: "easeInOut", repeat: Infinity }} />
+              <motion.circle cx="350" cy="350" r="200" fill="url(#glow-emerald)" animate={{ x: [30, -30, 30], y: [20, -20, 20] }} transition={{ duration: 12, ease: "easeInOut", repeat: Infinity }} />
+              <motion.circle cx="350" cy="100" r="160" fill="url(#glow-indigo)" animate={{ x: [-30, 30, -30], y: [30, -30, 30] }} transition={{ duration: 14, ease: "easeInOut", repeat: Infinity }} />
 
-                {/* EKG Line */}
-                <motion.path
-                  d="M15,110 L80,110 L95,60 L115,160 L135,90 L145,110 L220,110 L235,70 L255,140 L270,100 L280,110 L305,110"
-                  fill="none"
-                  stroke="url(#ekg-line)"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  filter="url(#glow-strong)"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: [0, 1, 1] }}
-                  transition={{ duration: 3, ease: "linear", repeat: Infinity }}
-                />
+              <g transform="translate(25, 25)">
+                {/* Back Card (Trend Data) */}
+                <motion.g 
+                  animate={{ y: [-8, 8, -8] }} 
+                  transition={{ duration: 7, ease: "easeInOut", repeat: Infinity }}
+                >
+                  <rect x="180" y="40" width="240" height="260" rx="32" fill="url(#glass-card)" stroke="url(#glass-border)" strokeWidth="1.5" filter="url(#soft-shadow)" />
+                  <g transform="translate(210, 70)">
+                    <rect x="0" y="0" width="40" height="40" rx="12" fill="#eff6ff" />
+                    <circle cx="20" cy="20" r="6" fill="#3b82f6" />
+                    <text x="55" y="16" fill="#0f172a" fontSize="16" fontWeight="800" fontFamily="sans-serif">Risk Trajectory</text>
+                    <text x="55" y="32" fill="#64748b" fontSize="12" fontWeight="600" fontFamily="sans-serif">Model Confidence: 99.8%</text>
+                    
+                    {/* Abstract Trend Curve */}
+                    <motion.path 
+                      d="M 0,160 C 50,160 80,100 120,120 C 150,135 160,80 180,40" 
+                      fill="none" stroke="url(#trend-line)" strokeWidth="6" strokeLinecap="round"
+                      initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 2, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
+                    />
+                    
+                    {/* Area fill under curve */}
+                    <path d="M 0,160 C 50,160 80,100 120,120 C 150,135 160,80 180,40 L 180,180 L 0,180 Z" fill="url(#glow-blue)" opacity="0.3" />
+                  </g>
+                </motion.g>
 
-                {/* Heart Rate Number */}
-                <g transform="translate(30, 45)">
-                  <text x="0" y="0" fill="#3b82f6" fontSize="12" fontWeight="bold" fontFamily="sans-serif">BPM</text>
-                  <motion.text 
-                    x="0" y="25" fill="#ffffff" fontSize="28" fontWeight="black" fontFamily="sans-serif"
-                    animate={{ opacity: [1, 0.8, 1] }} transition={{ duration: 0.8, repeat: Infinity }}
-                  >
-                    72
-                  </motion.text>
-                </g>
-                
-                {/* O2 Saturation */}
-                <g transform="translate(30, 95)">
-                  <text x="0" y="0" fill="#10b981" fontSize="12" fontWeight="bold" fontFamily="sans-serif">SpO2 %</text>
-                  <text x="0" y="25" fill="#ffffff" fontSize="24" fontWeight="bold" fontFamily="sans-serif">99</text>
-                </g>
+                {/* Middle Floating Widget (Status) */}
+                <motion.g 
+                  animate={{ y: [12, -12, 12] }} 
+                  transition={{ duration: 9, ease: "easeInOut", repeat: Infinity, delay: 1 }}
+                >
+                  <rect x="240" y="270" width="180" height="100" rx="28" fill="url(#glass-card)" stroke="url(#glass-border)" strokeWidth="1.5" filter="url(#soft-shadow)" />
+                  <g transform="translate(265, 295)">
+                    <circle cx="15" cy="25" r="10" fill="#10b981" opacity="0.2" />
+                    <motion.circle cx="15" cy="25" r="5" fill="#10b981" animate={{ opacity: [0.4, 1, 0.4], scale: [0.8, 1.2, 0.8] }} transition={{ duration: 2, repeat: Infinity }} />
+                    <text x="35" y="15" fill="#0f172a" fontSize="14" fontWeight="800" fontFamily="sans-serif">SYSTEM ACTIVE</text>
+                    <text x="35" y="35" fill="#64748b" fontSize="12" fontWeight="600" fontFamily="sans-serif">0ms Latency</text>
+                  </g>
+                </motion.g>
 
-                {/* Sepsis Risk Indicator */}
-                <g transform="translate(225, 45)">
-                  <rect x="0" y="-12" width="60" height="18" rx="9" fill="#ef4444" opacity="0.2" />
-                  <text x="10" y="0" fill="#ef4444" fontSize="10" fontWeight="bold" fontFamily="sans-serif">AI RISK</text>
-                  <text x="18" y="25" fill="#ef4444" fontSize="24" fontWeight="bold" fontFamily="sans-serif">14%</text>
-                </g>
-                
-                {/* Little pulsing dot */}
-                <motion.circle 
-                  cx="285" cy="35" r="4" fill="#ef4444" filter="url(#glow-strong)"
-                  animate={{ opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }}
-                />
+                {/* Front Main Card (Live EKG) */}
+                <motion.g 
+                  animate={{ y: [-15, 15, -15] }} 
+                  transition={{ duration: 8, ease: "easeInOut", repeat: Infinity, delay: 0.5 }}
+                >
+                  <rect x="20" y="110" width="280" height="180" rx="32" fill="url(#glass-card)" stroke="url(#glass-border)" strokeWidth="1.5" filter="url(#soft-shadow)" />
+                  <g transform="translate(50, 140)">
+                    <rect x="0" y="0" width="40" height="40" rx="12" fill="#ecfdf5" />
+                    <path d="M12,20 L16,20 L20,10 L24,28 L28,20 L32,20" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    
+                    <text x="55" y="16" fill="#0f172a" fontSize="16" fontWeight="800" fontFamily="sans-serif">Live Vitals</text>
+                    <text x="55" y="32" fill="#64748b" fontSize="12" fontWeight="600" fontFamily="sans-serif">Continuous Monitoring</text>
+                    
+                    {/* Pulse Line */}
+                    <motion.path 
+                      d="M 0,90 L 30,90 L 45,50 L 65,130 L 85,70 L 95,90 L 160,90 L 175,60 L 195,120 L 210,90 L 220,90" 
+                      fill="none" stroke="url(#ekg-line)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
+                      initial={{ strokeDasharray: "400 400", strokeDashoffset: 400 }} 
+                      animate={{ strokeDashoffset: [400, 0] }} 
+                      transition={{ duration: 3, ease: "linear", repeat: Infinity }}
+                    />
+                    
+                    {/* Glowing dots on peaks */}
+                    <motion.circle cx="65" cy="130" r="3" fill="#3b82f6" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 3, repeat: Infinity, times: [0, 0.25, 0.5] }} />
+                    <motion.circle cx="195" cy="120" r="3" fill="#3b82f6" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 3, repeat: Infinity, times: [0, 0.75, 1] }} />
+                  </g>
+                </motion.g>
+
+                {/* Floating Aesthetic Data Chips */}
+                <motion.g animate={{ y: [10, -10, 10], x: [-5, 5, -5] }} transition={{ duration: 6, ease: "easeInOut", repeat: Infinity, delay: 2 }}>
+                  <rect x="5" y="50" width="120" height="46" rx="23" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" filter="url(#soft-shadow)" />
+                  <circle cx="25" cy="73" r="4" fill="#6366f1" />
+                  <text x="40" y="77" fill="#0f172a" fontSize="12" fontWeight="800" fontFamily="sans-serif">ICU BED 04</text>
+                </motion.g>
+
               </g>
-
-              {/* Floating aesthetic elements around the monitor */}
-              <motion.g animate={{ y: [-10, 10, -10] }} transition={{ duration: 5, ease: "easeInOut", repeat: Infinity }}>
-                <rect x="310" y="220" width="70" height="70" rx="16" fill="#ffffff" filter="url(#shadow)" stroke="#e2e8f0" strokeWidth="1" />
-                <path d="M335,255 L345,265 L355,245" fill="none" stroke="#10b981" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                <text x="345" y="280" fill="#64748b" fontSize="10" fontWeight="bold" fontFamily="sans-serif" textAnchor="middle">CLEARED</text>
-              </motion.g>
-
-              <motion.g animate={{ y: [10, -10, 10] }} transition={{ duration: 6, ease: "easeInOut", repeat: Infinity, delay: 1 }}>
-                <rect x="20" y="240" width="100" height="40" rx="20" fill="#ffffff" filter="url(#shadow)" stroke="#e2e8f0" strokeWidth="1" />
-                <circle cx="45" cy="260" r="5" fill="#3b82f6" />
-                <text x="58" y="264" fill="#334155" fontSize="11" fontWeight="bold" fontFamily="sans-serif">ICU BED 04</text>
-              </motion.g>
             </svg>
           </motion.div>
         </div>
