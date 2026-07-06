@@ -16,9 +16,9 @@ interface LabValueProps {
 function LabValue({ label, value, unit, high }: LabValueProps) {
   const isHigh = high !== undefined && value !== null && value > high;
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-border last:border-0">
-      <span className="text-xs font-mono text-muted-foreground">{label}</span>
-      <span className={`text-xs font-mono font-bold ${isHigh ? "text-vital-danger" : "text-foreground"}`}>
+    <div className="flex items-center justify-between py-1.5 border-b border-border last:border-0 gap-2 min-w-0">
+      <span className="text-xs font-mono text-muted-foreground truncate flex-1">{label}</span>
+      <span className={`text-xs font-mono font-bold shrink-0 ${isHigh ? "text-vital-danger" : "text-foreground"}`}>
         {value !== null ? `${value} ${unit}` : "—"}
       </span>
     </div>

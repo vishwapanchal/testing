@@ -35,15 +35,17 @@ export function PatientCard({ patient, latestRisk, riskHistory, activeTripwireCo
       )}
     >
       <CardContent className="p-5 space-y-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="font-sora font-bold text-slate-900 text-lg mb-0.5">{patient.name}</h3>
-            <div className="flex items-center gap-2 text-slate-500 text-xs font-medium uppercase tracking-wider">
-              <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md">Bed {patient.bed_number}</span>
-              <span>MRN: {patient.mrn}</span>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-sora font-bold text-slate-900 text-lg mb-0.5 truncate" title={patient.name}>{patient.name}</h3>
+            <div className="flex items-center gap-2 text-slate-500 text-xs font-medium uppercase tracking-wider flex-wrap">
+              <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md whitespace-nowrap">Bed {patient.bed_number}</span>
+              <span className="truncate">MRN: {patient.mrn}</span>
             </div>
           </div>
-          <TierBadge tier={isCriticalOverride ? "CRITICAL" : tier} size="sm" />
+          <div className="shrink-0">
+            <TierBadge tier={isCriticalOverride ? "CRITICAL" : tier} size="sm" />
+          </div>
         </div>
 
         <div className="pt-2">

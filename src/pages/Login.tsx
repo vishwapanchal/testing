@@ -94,8 +94,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden bg-slate-50 selection:bg-primary/30">
-      <div className="absolute top-6 right-6 z-50 flex items-center gap-4">
+    <div className="min-h-screen relative flex flex-col p-4 sm:p-8 overflow-x-hidden bg-slate-50 selection:bg-primary/30">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-4">
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Button variant="ghost" className="bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-full px-6 transition-all duration-300 shadow-sm" onClick={() => navigate("/")}>
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -108,7 +108,7 @@ export default function Login() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="w-full max-w-[440px] space-y-8 relative z-10"
+        className="w-full max-w-[440px] m-auto space-y-8 relative z-10 py-10"
       >
         {/* Logo and Header */}
         <motion.div variants={itemVariants} className="flex flex-col items-center gap-6">
@@ -135,7 +135,7 @@ export default function Login() {
         <motion.div variants={itemVariants}>
           <div className="relative group">
             <Card className="relative bg-white border border-slate-200 shadow-xl overflow-hidden rounded-[2rem]">
-              <CardHeader className="pb-6 pt-8 px-8">
+              <CardHeader className="pb-6 pt-8 px-6 sm:px-8">
                 <CardTitle className="text-2xl font-semibold text-slate-900 text-center">
                   <AnimatePresence mode="wait">
                     <motion.span
@@ -169,7 +169,7 @@ export default function Login() {
                   </AnimatePresence>
                 </CardDescription>
               </CardHeader>
-              <CardContent className="px-8 pb-8 space-y-6">
+              <CardContent className="px-6 sm:px-8 pb-8 space-y-6">
                 <AnimatePresence mode="wait">
                   {showForgotPassword ? (
                     <motion.form

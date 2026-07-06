@@ -58,9 +58,9 @@ export function TripwirePanel({ alerts, latestVital }: TripwirePanelProps) {
       <CardContent className="space-y-2">
         {isCriticalOverride && (
           <div className="p-3 rounded-md border-2 border-tier-critical/60 bg-tier-critical/10 animate-flash-critical">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-tier-critical" />
-              <span className="text-xs font-mono font-black text-tier-critical uppercase tracking-wider">
+            <div className="flex items-center gap-2 min-w-0">
+              <Zap className="h-4 w-4 text-tier-critical shrink-0" />
+              <span className="text-xs font-mono font-black text-tier-critical uppercase tracking-wider truncate">
                 CRITICAL OVERRIDE — {totalActive} tripwires breached
               </span>
             </div>
@@ -93,20 +93,20 @@ export function TripwirePanel({ alerts, latestVital }: TripwirePanelProps) {
                 )}
                 <div className="flex-1 min-w-0">
                   <span className={cn(
-                    "text-xs font-mono font-bold",
+                    "text-xs font-mono font-bold break-words",
                     alert.isMental ? "text-tier-amber" : "text-vital-danger"
                   )}>
                     {alert.metric}
                   </span>
                   {alert.isMental && (
-                    <span className="text-[10px] font-mono text-tier-amber ml-2">
+                    <span className="text-[10px] font-mono text-tier-amber ml-1 sm:ml-2 break-words">
                       (NURSE ASSESSMENT — PRIMARY TRIGGER)
                     </span>
                   )}
                 </div>
-                <div className="text-right shrink-0">
-                  <span className="text-xs font-mono font-bold text-foreground">{alert.value}</span>
-                  <p className="text-[10px] font-mono text-muted-foreground">{alert.threshold}</p>
+                <div className="text-right shrink-0 max-w-[40%]">
+                  <span className="text-xs font-mono font-bold text-foreground break-words">{alert.value}</span>
+                  <p className="text-[10px] font-mono text-muted-foreground break-words">{alert.threshold}</p>
                 </div>
               </div>
             ))}
@@ -116,7 +116,7 @@ export function TripwirePanel({ alerts, latestVital }: TripwirePanelProps) {
         {/* Hardcoded threshold reference */}
         <div className="mt-3 pt-3 border-t border-border">
           <p className="text-[10px] font-mono text-muted-foreground mb-1.5 uppercase tracking-wider">Threshold Reference</p>
-          <div className="grid grid-cols-2 gap-1 text-[10px] font-mono text-muted-foreground">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[10px] font-mono text-muted-foreground break-words">
             <span>Temp: &lt;36°C or &gt;38.3°C</span>
             <span>HR: &gt;90 bpm + trend</span>
             <span>RR: &gt;20/min</span>

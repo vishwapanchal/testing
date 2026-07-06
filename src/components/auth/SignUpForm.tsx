@@ -148,7 +148,7 @@ export default function SignUpForm({ onSwitchToLogin }: SignUpFormProps) {
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-[11px] font-semibold text-slate-700 uppercase tracking-wider">Department</Label>
           <Select value={department} onValueChange={setDepartment}>

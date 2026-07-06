@@ -150,7 +150,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 md:p-8 overflow-hidden bg-slate-50 selection:bg-primary/30">
+    <div className="min-h-screen relative flex flex-col p-4 sm:p-8 overflow-x-hidden bg-slate-50 selection:bg-primary/30">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Light background gradient */}
@@ -165,7 +165,7 @@ export default function Register() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 0.5 }}
-        className="absolute top-6 right-6 z-50 flex items-center gap-4"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 flex items-center gap-4"
       >
         <Button 
           variant="ghost" 
@@ -181,7 +181,7 @@ export default function Register() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="w-full max-w-[500px] relative z-10"
+        className="w-full max-w-[500px] m-auto relative z-10 py-10"
       >
         <div className="flex flex-col items-center gap-6 mb-8">
           <motion.div 
@@ -209,7 +209,7 @@ export default function Register() {
             {/* Subtle highlight */}
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/10 to-transparent"></div>
             
-            <CardHeader className="pb-6 pt-8 px-8">
+            <CardHeader className="pb-6 pt-8 px-6 sm:px-8">
               <CardTitle className="text-xl font-medium text-slate-900 flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-primary" />
                 Organization Details
@@ -218,7 +218,7 @@ export default function Register() {
                 Initialize your workspace and admin credentials.
               </CardDescription>
             </CardHeader>
-            <CardContent className="px-8 pb-8">
+            <CardContent className="px-6 sm:px-8 pb-8">
               <form onSubmit={handleRegister} className="space-y-8">
                 
                 {/* Hospital Section */}
@@ -239,7 +239,7 @@ export default function Register() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2 group/input">
                       <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ml-1">Tier</Label>
                       <Select value={tier} onValueChange={setTier}>

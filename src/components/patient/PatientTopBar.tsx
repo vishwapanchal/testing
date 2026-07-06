@@ -15,7 +15,7 @@ export function PatientTopBar({ patient, tier, isCriticalOverride }: PatientTopB
   const displayTier = isCriticalOverride ? "CRITICAL" : tier;
 
   return (
-    <div className="flex items-center gap-4 p-4 border-b border-border bg-card rounded-lg">
+    <div className="flex items-center gap-4 p-4 border-b border-border bg-card rounded-lg min-w-0 w-full">
       <button
         onClick={() => navigate("/")}
         className="p-2 rounded-md hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
@@ -24,8 +24,8 @@ export function PatientTopBar({ patient, tier, isCriticalOverride }: PatientTopB
       </button>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg font-mono font-bold text-foreground truncate">
+        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+          <h1 className="text-lg font-mono font-bold text-foreground truncate min-w-0 flex-1">
             {patient.name}
           </h1>
           <TierBadge tier={displayTier} size="lg" />
@@ -35,11 +35,11 @@ export function PatientTopBar({ patient, tier, isCriticalOverride }: PatientTopB
             </span>
           )}
         </div>
-        <div className="flex items-center gap-4 mt-1 text-xs font-mono text-muted-foreground">
-          <span>Bed {patient.bed_number}</span>
-          <span>MRN: {patient.mrn}</span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+        <div className="flex items-center gap-4 mt-1 text-xs font-mono text-muted-foreground flex-wrap">
+          <span className="truncate">Bed {patient.bed_number}</span>
+          <span className="truncate">MRN: {patient.mrn}</span>
+          <span className="flex items-center gap-1 truncate">
+            <Clock className="h-3 w-3 shrink-0" />
             Admitted {format(new Date(patient.admission_time), "dd MMM yyyy HH:mm")}
           </span>
         </div>

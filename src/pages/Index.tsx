@@ -170,7 +170,7 @@ const Index = () => {
   }).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden font-sans text-slate-900 selection:bg-blue-100">
+    <div className="min-h-screen bg-slate-50 relative overflow-x-hidden font-sans text-slate-900 selection:bg-blue-100">
       <div className="relative z-10 flex flex-col min-h-screen">
         <GlobalNav />
 
@@ -267,7 +267,7 @@ const Index = () => {
                     hidden: { opacity: 0 },
                     show: { opacity: 1, transition: { staggerChildren: 0.08 } }
                   }}
-                  className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
                   {sortedPatients.map((patient) => (
                     <motion.div 

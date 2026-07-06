@@ -34,12 +34,12 @@ function VitalCard({ label, value, unit, icon, danger, warning }: VitalCardProps
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">{label}</p>
+        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider truncate">{label}</p>
         <p className={cn(
-          "text-lg font-mono font-bold",
+          "text-lg font-mono font-bold truncate",
           danger ? "text-vital-danger" : warning ? "text-vital-warning" : "text-foreground"
         )}>
-          {value ?? "—"} <span className="text-xs font-normal text-muted-foreground">{unit}</span>
+          {value ?? "—"} <span className="text-xs font-normal text-muted-foreground shrink-0">{unit}</span>
         </p>
       </div>
     </div>
@@ -71,7 +71,7 @@ export function VitalsPanel({ latestVital }: VitalsPanelProps) {
           <MentalStatusAlert status={mentalStatus} />
         )}
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 min-w-0">
           <VitalCard
             label="Heart Rate"
             value={latestVital.heart_rate}

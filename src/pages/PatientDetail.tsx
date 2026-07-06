@@ -170,9 +170,11 @@ const PatientDetail = () => {
             className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200 bg-white shadow-xl relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-transparent pointer-events-none" />
-            <div className="relative z-10 w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <PatientTopBar patient={patient} tier={tier} isCriticalOverride={isCriticalOverride} />
-              <div className="flex items-center gap-3 shrink-0">
+            <div className="relative z-10 w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-w-0">
+              <div className="flex-1 min-w-0 w-full">
+                <PatientTopBar patient={patient} tier={tier} isCriticalOverride={isCriticalOverride} />
+              </div>
+              <div className="flex items-center gap-3 shrink-0 flex-wrap">
                 <LogVitalsDrawer patientId={patient.id} />
                 <LogLabsDrawer patientId={patient.id} />
                 <DischargePatientDialog patientId={patient.id} patientName={patient.name} />
@@ -182,8 +184,8 @@ const PatientDetail = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bento-grid">
             {/* Left Column: Slider-based Vitals/Labs Input */}
-            <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6 flex flex-col">
-              <div className={`${glassClasses} h-full p-1`}>
+            <motion.div variants={itemVariants} className="lg:col-span-3 space-y-6 flex flex-col min-w-0">
+              <div className={`${glassClasses} h-full p-1 min-w-0 overflow-x-hidden`}>
                 <VitalsOverridePanel
                   initialVitals={initialVitals}
                   onVitalsChange={handleVitalsChange}
@@ -192,24 +194,24 @@ const PatientDetail = () => {
             </motion.div>
 
             {/* Center Column: DB Vitals & Charts */}
-            <motion.div variants={itemVariants} className="lg:col-span-5 space-y-6 flex flex-col">
-              <div className={`${glassClasses} p-1`}>
+            <motion.div variants={itemVariants} className="lg:col-span-5 space-y-6 flex flex-col min-w-0">
+              <div className={`${glassClasses} p-1 min-w-0 overflow-x-hidden`}>
                 <VitalsPanel latestVital={latestVital} />
               </div>
-              <div className={`${glassClasses} flex-1 p-1 min-h-[300px]`}>
+              <div className={`${glassClasses} flex-1 p-1 min-h-[300px] min-w-0 overflow-x-hidden`}>
                 <VitalsChart vitals={vitals ?? []} />
               </div>
-              <div className={`${glassClasses} p-1`}>
+              <div className={`${glassClasses} p-1 min-w-0 overflow-x-hidden`}>
                 <LabsPanel lab={lab} />
               </div>
             </motion.div>
 
             {/* Right Column: Live Risk + HITL Actions */}
-            <motion.div variants={itemVariants} className="lg:col-span-4 space-y-6 flex flex-col">
-              <div className={`${glassClasses}`}>
+            <motion.div variants={itemVariants} className="lg:col-span-4 space-y-6 flex flex-col min-w-0">
+              <div className={`${glassClasses} min-w-0 overflow-x-hidden`}>
                 <RiskGauge assessment={effectiveRisk as any} />
               </div>
-              <div className={`${glassClasses}`}>
+              <div className={`${glassClasses} min-w-0 overflow-x-hidden`}>
                 <ConfidenceInterval assessment={effectiveRisk as any} />
               </div>
 
@@ -287,17 +289,17 @@ const PatientDetail = () => {
                 )}
               </AnimatePresence>
 
-              <div className={`${glassClasses}`}>
+              <div className={`${glassClasses} min-w-0 overflow-x-hidden`}>
                 <HITLActionPanel
                   tier={tier}
                   isCriticalOverride={isCriticalOverride}
                   patientName={patient.name}
                 />
               </div>
-              <div className={`${glassClasses}`}>
+              <div className={`${glassClasses} min-w-0 overflow-x-hidden`}>
                 <TripwirePanel alerts={alerts ?? []} latestVital={latestVital} />
               </div>
-              <div className={`${glassClasses}`}>
+              <div className={`${glassClasses} min-w-0 overflow-x-hidden`}>
                 <CXRUploadPanel />
               </div>
             </motion.div>

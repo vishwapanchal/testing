@@ -72,14 +72,14 @@ export default function ResetPassword() {
 
   if (!isRecovery) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-slate-50 flex flex-col p-4 sm:p-8 relative overflow-x-hidden">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="relative z-10 w-full max-w-md"
+          className="relative z-10 w-full max-w-md m-auto py-10"
         >
-          <div className="bg-white border border-slate-200 p-8 rounded-2xl shadow-xl overflow-hidden relative">
+          <div className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-xl overflow-hidden relative">
             
             <div className="flex flex-col items-center gap-6 relative z-10">
               <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center border border-red-100">
@@ -105,13 +105,13 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden selection:bg-blue-100">
+    <div className="min-h-screen bg-slate-50 flex flex-col p-4 sm:p-8 relative overflow-x-hidden selection:bg-blue-100">
 
       <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="w-full max-w-md relative z-10"
+        className="w-full max-w-md m-auto relative z-10 py-10"
       >
         {/* Brand Header */}
         <motion.div variants={itemVariants} className="flex flex-col items-center gap-4 mb-8">
@@ -132,7 +132,7 @@ export default function ResetPassword() {
 
         {/* Main Card */}
         <motion.div variants={itemVariants} className="relative group/card">
-          <div className="relative bg-white border border-slate-200 p-8 rounded-3xl shadow-xl overflow-hidden">
+          <div className="relative bg-white border border-slate-200 p-6 sm:p-8 rounded-3xl shadow-xl overflow-hidden">
             
             <form onSubmit={handleResetPassword} className="space-y-6 relative z-10">
               
