@@ -100,10 +100,10 @@ export default function Landing() {
             {/* Massive Heading */}
             <motion.h1 
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-slate-900 tracking-tight leading-[1.05] break-words"
+              className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light text-slate-800 tracking-tight leading-[1.05] break-words"
               style={{ fontFamily: "'Overpass', sans-serif" }}
             >
-              Precision Intelligence <br className="hidden lg:block"/> for <br className="lg:hidden"/>
+              Precision Intelligence <br className="hidden lg:block"/> <span className="text-slate-400 font-extralight italic">for</span> <br className="lg:hidden"/>
               <span className="inline-flex items-center mt-2 relative">
                 <span 
                   className="text-blue-600 pr-2 relative z-10 drop-shadow-sm font-normal"
@@ -142,93 +142,77 @@ export default function Landing() {
             {/* Decorative Glow */}
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-200/40 to-indigo-300/30 rounded-full blur-[80px]" />
             
-            {/* The 3D SVG Art */}
-            <svg viewBox="0 0 400 400" className="w-full h-full relative z-10 drop-shadow-2xl overflow-visible">
+            {/* The 3D SVG Art - Abstract ICU Monitor */}
+            <svg viewBox="0 0 400 400" className="w-full h-full relative z-10 drop-shadow-xl overflow-visible">
               <defs>
-                <linearGradient id="grid-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.2" />
+                <linearGradient id="icu-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.4" />
                 </linearGradient>
-                <linearGradient id="node-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#2563eb" />
-                  <stop offset="100%" stopColor="#6366f1" />
+                <linearGradient id="ekg-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.2" />
+                  <stop offset="50%" stopColor="#3b82f6" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.2" />
                 </linearGradient>
-                <filter id="glow">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                  <feMerge>
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
+                <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="6" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
               </defs>
 
               <g transform="translate(200, 200)">
-                {/* Rotating Base Grid (Isometric projection simulated via scale & skew) */}
+                {/* Background pulse ring */}
+                <motion.circle
+                  r="120"
+                  fill="none"
+                  stroke="url(#icu-grad)"
+                  strokeWidth="1"
+                  strokeDasharray="4 12"
+                  animate={{ rotate: 360, scale: [1, 1.05, 1] }}
+                  transition={{ rotate: { duration: 60, ease: "linear", repeat: Infinity }, scale: { duration: 4, ease: "easeInOut", repeat: Infinity } }}
+                  opacity="0.5"
+                />
+                
+                {/* Abstract ICU Bed/Monitor Base */}
+                <motion.path
+                  d="M-100,-40 L100,-40 L120,40 L-120,40 Z"
+                  fill="url(#icu-grad)"
+                  opacity="0.1"
+                  animate={{ y: [-5, 5, -5] }}
+                  transition={{ duration: 6, ease: "easeInOut", repeat: Infinity }}
+                />
+                
+                {/* Grid Lines on Bed */}
                 <motion.g 
-                  animate={{ rotateZ: 360 }} 
-                  transition={{ duration: 60, ease: "linear", repeat: Infinity }}
-                  style={{ transformOrigin: "0 0" }}
-                >
-                  <g transform="scale(1, 0.5) rotate(45)">
-                    {[...Array(10)].map((_, i) => (
-                      <rect key={`h-${i}`} x="-150" y={-150 + i * 30} width="300" height="1" fill="url(#grid-grad)" opacity="0.3" />
-                    ))}
-                    {[...Array(10)].map((_, i) => (
-                      <rect key={`v-${i}`} x={-150 + i * 30} y="-150" width="1" height="300" fill="url(#grid-grad)" opacity="0.3" />
-                    ))}
-                  </g>
-                </motion.g>
-
-                {/* Floating Central Neural Core */}
-                <motion.g
-                  animate={{ y: [-10, 10, -10] }}
+                  opacity="0.2" stroke="#3b82f6" strokeWidth="1"
+                  animate={{ y: [-5, 5, -5] }}
                   transition={{ duration: 6, ease: "easeInOut", repeat: Infinity }}
                 >
-                  {/* Outer Ring */}
-                  <motion.circle 
-                    r="80" fill="none" stroke="url(#grid-grad)" strokeWidth="2" strokeDasharray="10 5 4 5"
-                    animate={{ rotate: -360 }} transition={{ duration: 40, ease: "linear", repeat: Infinity }}
-                  />
-                  {/* Inner Ring */}
-                  <motion.circle 
-                    r="60" fill="none" stroke="url(#node-grad)" strokeWidth="1" strokeDasharray="40 10"
-                    animate={{ rotate: 360 }} transition={{ duration: 30, ease: "linear", repeat: Infinity }}
-                  />
-                  
-                  {/* Central Node */}
-                  <circle r="25" fill="url(#node-grad)" filter="url(#glow)" opacity="0.9" />
-                  <circle r="15" fill="#ffffff" opacity="0.5" />
-                  
-                  {/* Orbiting Satellites */}
-                  {[0, 120, 240].map((angle, index) => (
-                    <motion.g
-                      key={`sat-${index}`}
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 15, ease: "linear", repeat: Infinity, delay: index * -5 }}
-                    >
-                      <g transform={`rotate(${angle})`}>
-                        <motion.circle 
-                          cx="90" cy="0" r="8" fill="url(#node-grad)" filter="url(#glow)"
-                          animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 2, repeat: Infinity, delay: index }}
-                        />
-                        <line x1="25" y1="0" x2="90" y2="0" stroke="url(#grid-grad)" strokeWidth="1" strokeDasharray="4 4" />
-                      </g>
-                    </motion.g>
-                  ))}
-                  
-                  {/* Floating geometric data blocks */}
-                  <motion.path 
-                    d="M-30,-50 L-10,-60 L10,-50 L-10,-40 Z" fill="url(#node-grad)" opacity="0.7"
-                    animate={{ y: [0, -15, 0], rotate: [0, 10, 0] }} transition={{ duration: 4, ease: "easeInOut", repeat: Infinity }}
-                  />
-                  <motion.path 
-                    d="M40,30 L60,20 L80,30 L60,40 Z" fill="url(#grid-grad)" opacity="0.6"
-                    animate={{ y: [0, 20, 0], rotate: [0, -15, 0] }} transition={{ duration: 5, ease: "easeInOut", repeat: Infinity, delay: 1 }}
-                  />
-                  <motion.path 
-                    d="M-60,10 L-40,0 L-20,10 L-40,20 Z" fill="#60a5fa" opacity="0.8" filter="url(#glow)"
-                    animate={{ y: [0, -25, 0], scale: [1, 1.2, 1] }} transition={{ duration: 7, ease: "easeInOut", repeat: Infinity, delay: 2 }}
-                  />
+                  <line x1="-80" y1="-20" x2="80" y2="-20" />
+                  <line x1="-100" y1="0" x2="100" y2="0" />
+                  <line x1="-120" y1="20" x2="120" y2="20" />
+                </motion.g>
+
+                {/* EKG Heartbeat Line */}
+                <motion.path
+                  d="M-140,10 L-60,10 L-40,-30 L-20,40 L0,10 L80,10 L100,-15 L120,10 L140,10"
+                  fill="none"
+                  stroke="url(#ekg-grad)"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  filter="url(#soft-glow)"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1, y: [-5, 5, -5] }}
+                  transition={{ pathLength: { duration: 3, ease: "easeInOut", repeat: Infinity }, opacity: { duration: 0.5 }, y: { duration: 6, ease: "easeInOut", repeat: Infinity } }}
+                />
+                
+                {/* Floating Medical Crosses */}
+                <motion.g animate={{ y: [-15, 0, -15], opacity: [0.4, 0.8, 0.4] }} transition={{ duration: 4, ease: "easeInOut", repeat: Infinity, delay: 1 }}>
+                  <path d="M-80,-70 h10 v-10 h10 v10 h10 v10 h-10 v10 h-10 v-10 h-10 z" fill="#10b981" opacity="0.6" filter="url(#soft-glow)" transform="scale(0.4)" />
+                </motion.g>
+                <motion.g animate={{ y: [-10, 10, -10], opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 5, ease: "easeInOut", repeat: Infinity, delay: 2 }}>
+                  <path d="M120,-60 h10 v-10 h10 v10 h10 v10 h-10 v10 h-10 v-10 h-10 z" fill="#3b82f6" opacity="0.8" filter="url(#soft-glow)" transform="scale(0.6)" />
                 </motion.g>
               </g>
             </svg>
