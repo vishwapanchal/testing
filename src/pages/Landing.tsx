@@ -142,134 +142,115 @@ export default function Landing() {
             {/* Decorative Glow */}
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-200/40 to-indigo-300/30 rounded-full blur-[80px]" />
             
-            {/* The Abstract ICU Monitor Graphic */}
-            <svg viewBox="0 0 500 500" className="w-full h-full relative z-10 drop-shadow-2xl overflow-visible">
+            {/* The Vascular AI Scanner Graphic */}
+            <svg viewBox="0 0 600 600" className="w-full h-full relative z-10 drop-shadow-2xl overflow-visible font-sans">
               <defs>
-                {/* Mesh Gradient Background Elements */}
-                <radialGradient id="glow-blue" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
-                </radialGradient>
-                <radialGradient id="glow-emerald" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.3" />
+                {/* Gradients */}
+                <linearGradient id="vessel-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.2" />
+                </linearGradient>
+                <linearGradient id="threat-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ef4444" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#f97316" stopOpacity="0.8" />
+                </linearGradient>
+                <linearGradient id="scan-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#10b981" stopOpacity="0.5" />
                   <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
-                </radialGradient>
-                <radialGradient id="glow-indigo" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
-                </radialGradient>
-
-                {/* Card Material */}
-                <linearGradient id="glass-card" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-                  <stop offset="100%" stopColor="#f8fafc" stopOpacity="0.5" />
                 </linearGradient>
 
-                <linearGradient id="glass-border" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0.2" />
-                </linearGradient>
-
-                {/* Line Gradients */}
-                <linearGradient id="trend-line" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.1" />
-                  <stop offset="50%" stopColor="#6366f1" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1" />
-                </linearGradient>
-                <linearGradient id="ekg-line" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.1" />
-                  <stop offset="30%" stopColor="#10b981" stopOpacity="1" />
-                  <stop offset="70%" stopColor="#3b82f6" stopOpacity="1" />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1" />
-                </linearGradient>
-
-                <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="20" stdDeviation="25" floodColor="#0f172a" floodOpacity="0.08" />
+                {/* Filters */}
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="6" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
-                
-                <filter id="glass-blur">
+                <filter id="heavy-glow">
                   <feGaussianBlur stdDeviation="12" result="blur" />
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
               </defs>
 
-              {/* Background Ambient Orbs */}
-              <motion.circle cx="150" cy="150" r="180" fill="url(#glow-blue)" animate={{ x: [-20, 20, -20], y: [-20, 30, -20] }} transition={{ duration: 10, ease: "easeInOut", repeat: Infinity }} />
-              <motion.circle cx="350" cy="350" r="200" fill="url(#glow-emerald)" animate={{ x: [30, -30, 30], y: [20, -20, 20] }} transition={{ duration: 12, ease: "easeInOut", repeat: Infinity }} />
-              <motion.circle cx="350" cy="100" r="160" fill="url(#glow-indigo)" animate={{ x: [-30, 30, -30], y: [30, -30, 30] }} transition={{ duration: 14, ease: "easeInOut", repeat: Infinity }} />
-
-              <g transform="translate(25, 25)">
-                {/* Back Card (Trend Data) */}
+              <g transform="translate(300, 300)">
+                {/* Ambient Grid Scanner */}
                 <motion.g 
-                  animate={{ y: [-8, 8, -8] }} 
-                  transition={{ duration: 7, ease: "easeInOut", repeat: Infinity }}
+                  animate={{ rotate: 360 }} 
+                  transition={{ duration: 40, ease: "linear", repeat: Infinity }}
+                  opacity="0.15"
                 >
-                  <rect x="180" y="40" width="240" height="260" rx="32" fill="url(#glass-card)" stroke="url(#glass-border)" strokeWidth="1.5" filter="url(#soft-shadow)" />
-                  <g transform="translate(210, 70)">
-                    <rect x="0" y="0" width="40" height="40" rx="12" fill="#eff6ff" />
-                    <circle cx="20" cy="20" r="6" fill="#3b82f6" />
-                    <text x="55" y="16" fill="#0f172a" fontSize="16" fontWeight="800" fontFamily="sans-serif">Risk Trajectory</text>
-                    <text x="55" y="32" fill="#64748b" fontSize="12" fontWeight="600" fontFamily="sans-serif">Model Confidence: 99.8%</text>
-                    
-                    {/* Abstract Trend Curve */}
-                    <motion.path 
-                      d="M 0,160 C 50,160 80,100 120,120 C 150,135 160,80 180,40" 
-                      fill="none" stroke="url(#trend-line)" strokeWidth="6" strokeLinecap="round"
-                      initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 2, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
-                    />
-                    
-                    {/* Area fill under curve */}
-                    <path d="M 0,160 C 50,160 80,100 120,120 C 150,135 160,80 180,40 L 180,180 L 0,180 Z" fill="url(#glow-blue)" opacity="0.3" />
+                  <circle cx="0" cy="0" r="220" fill="none" stroke="#334155" strokeWidth="1" strokeDasharray="4 12" />
+                  <circle cx="0" cy="0" r="160" fill="none" stroke="#334155" strokeWidth="1" strokeDasharray="2 6" />
+                  <line x1="-240" y1="0" x2="240" y2="0" stroke="#334155" strokeWidth="1" />
+                  <line x1="0" y1="-240" x2="0" y2="240" stroke="#334155" strokeWidth="1" />
+                </motion.g>
+
+                {/* The Vascular / Neural Structure */}
+                <g filter="url(#glow)">
+                  <path d="M 0,180 C 0,100 -60,60 -80,0 C -100,-60 -40,-100 -20,-160" fill="none" stroke="url(#vessel-grad)" strokeWidth="6" strokeLinecap="round" />
+                  <path d="M -80,0 C -120,-20 -160,20 -200,-20" fill="none" stroke="url(#vessel-grad)" strokeWidth="4" strokeLinecap="round" />
+                  <path d="M 0,180 C 40,120 100,100 80,20 C 60,-60 120,-100 140,-160" fill="none" stroke="url(#vessel-grad)" strokeWidth="7" strokeLinecap="round" />
+                  <path d="M 80,20 C 140,0 160,60 220,40" fill="none" stroke="url(#vessel-grad)" strokeWidth="3" strokeLinecap="round" />
+                  <path d="M 80,20 C 100,-20 60,-40 80,-80" fill="none" stroke="url(#vessel-grad)" strokeWidth="3" strokeLinecap="round" />
+                </g>
+
+                {/* Healthy Nodes */}
+                {[
+                  [-20, -160], [140, -160], [-200, -20], [220, 40], [80, -80], [0, 180]
+                ].map((pos, i) => (
+                  <circle key={i} cx={pos[0]} cy={pos[1]} r="6" fill="#3b82f6" filter="url(#glow)" />
+                ))}
+
+                {/* Sepsis Threat Nodes */}
+                <motion.circle 
+                  cx="-80" cy="0" r="10" fill="url(#threat-grad)" filter="url(#heavy-glow)"
+                  animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }} transition={{ duration: 2, repeat: Infinity }}
+                />
+                <motion.circle 
+                  cx="80" cy="20" r="14" fill="url(#threat-grad)" filter="url(#heavy-glow)"
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.8, 1, 0.8] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                />
+
+                {/* Scanning Laser */}
+                <motion.g
+                  animate={{ y: [-200, 200, -200] }}
+                  transition={{ duration: 6, ease: "easeInOut", repeat: Infinity }}
+                >
+                  <rect x="-250" y="-10" width="500" height="20" fill="url(#scan-grad)" />
+                  <line x1="-250" y1="0" x2="250" y2="0" stroke="#10b981" strokeWidth="2" filter="url(#glow)" />
+                </motion.g>
+
+                {/* AI Targeting Reticles & Tooltips (Appears over Sepsis Nodes) */}
+                <motion.g 
+                  animate={{ opacity: [0.2, 1, 0.2] }} 
+                  transition={{ duration: 3, ease: "easeInOut", repeat: Infinity, delay: 0.5 }}
+                >
+                  {/* Target 1 */}
+                  <g transform="translate(-80, 0)">
+                    <path d="M -25,-15 L -25,-25 L -15,-25 M 15,-25 L 25,-25 L 25,-15 M 25,15 L 25,25 L 15,25 M -15,25 L -25,25 L -25,15" fill="none" stroke="#ef4444" strokeWidth="2" />
+                    <line x1="25" y1="-25" x2="60" y2="-50" stroke="#ef4444" strokeWidth="1" strokeDasharray="2 2" />
+                    <rect x="60" y="-70" width="120" height="40" rx="4" fill="#ffffff" stroke="#ef4444" strokeWidth="1" filter="url(#glow)" />
+                    <text x="70" y="-55" fill="#ef4444" fontSize="10" fontWeight="bold" letterSpacing="1">BIOMARKER 4A</text>
+                    <text x="70" y="-40" fill="#0f172a" fontSize="14" fontWeight="800">SEPSIS DETECTED</text>
+                  </g>
+                  
+                  {/* Target 2 */}
+                  <g transform="translate(80, 20)">
+                    <path d="M -30,-20 L -30,-30 L -20,-30 M 20,-30 L 30,-30 L 30,-20 M 30,20 L 30,30 L 20,30 M -20,30 L -30,30 L -30,20" fill="none" stroke="#f97316" strokeWidth="2" />
+                    <line x1="-30" y1="30" x2="-60" y2="70" stroke="#f97316" strokeWidth="1" strokeDasharray="2 2" />
+                    <rect x="-170" y="70" width="110" height="40" rx="4" fill="#ffffff" stroke="#f97316" strokeWidth="1" filter="url(#glow)" />
+                    <text x="-160" y="85" fill="#f97316" fontSize="10" fontWeight="bold" letterSpacing="1">LACTATE SPIKE</text>
+                    <text x="-160" y="100" fill="#0f172a" fontSize="14" fontWeight="800">RISK: 94%</text>
                   </g>
                 </motion.g>
 
-                {/* Middle Floating Widget (Status) */}
-                <motion.g 
-                  animate={{ y: [12, -12, 12] }} 
-                  transition={{ duration: 9, ease: "easeInOut", repeat: Infinity, delay: 1 }}
-                >
-                  <rect x="240" y="270" width="180" height="100" rx="28" fill="url(#glass-card)" stroke="url(#glass-border)" strokeWidth="1.5" filter="url(#soft-shadow)" />
-                  <g transform="translate(265, 295)">
-                    <circle cx="15" cy="25" r="10" fill="#10b981" opacity="0.2" />
-                    <motion.circle cx="15" cy="25" r="5" fill="#10b981" animate={{ opacity: [0.4, 1, 0.4], scale: [0.8, 1.2, 0.8] }} transition={{ duration: 2, repeat: Infinity }} />
-                    <text x="35" y="15" fill="#0f172a" fontSize="14" fontWeight="800" fontFamily="sans-serif">SYSTEM ACTIVE</text>
-                    <text x="35" y="35" fill="#64748b" fontSize="12" fontWeight="600" fontFamily="sans-serif">0ms Latency</text>
-                  </g>
+                {/* Floating "AI Sentinel" Orbitals */}
+                <motion.g animate={{ rotate: -360 }} transition={{ duration: 20, ease: "linear", repeat: Infinity }}>
+                  <circle cx="200" cy="0" r="5" fill="#10b981" filter="url(#heavy-glow)" />
+                  <path d="M 190,0 A 200 200 0 0 1 210,0" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" />
                 </motion.g>
-
-                {/* Front Main Card (Live EKG) */}
-                <motion.g 
-                  animate={{ y: [-15, 15, -15] }} 
-                  transition={{ duration: 8, ease: "easeInOut", repeat: Infinity, delay: 0.5 }}
-                >
-                  <rect x="20" y="110" width="280" height="180" rx="32" fill="url(#glass-card)" stroke="url(#glass-border)" strokeWidth="1.5" filter="url(#soft-shadow)" />
-                  <g transform="translate(50, 140)">
-                    <rect x="0" y="0" width="40" height="40" rx="12" fill="#ecfdf5" />
-                    <path d="M12,20 L16,20 L20,10 L24,28 L28,20 L32,20" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                    
-                    <text x="55" y="16" fill="#0f172a" fontSize="16" fontWeight="800" fontFamily="sans-serif">Live Vitals</text>
-                    <text x="55" y="32" fill="#64748b" fontSize="12" fontWeight="600" fontFamily="sans-serif">Continuous Monitoring</text>
-                    
-                    {/* Pulse Line */}
-                    <motion.path 
-                      d="M 0,90 L 30,90 L 45,50 L 65,130 L 85,70 L 95,90 L 160,90 L 175,60 L 195,120 L 210,90 L 220,90" 
-                      fill="none" stroke="url(#ekg-line)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
-                      initial={{ strokeDasharray: "400 400", strokeDashoffset: 400 }} 
-                      animate={{ strokeDashoffset: [400, 0] }} 
-                      transition={{ duration: 3, ease: "linear", repeat: Infinity }}
-                    />
-                    
-                    {/* Glowing dots on peaks */}
-                    <motion.circle cx="65" cy="130" r="3" fill="#3b82f6" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 3, repeat: Infinity, times: [0, 0.25, 0.5] }} />
-                    <motion.circle cx="195" cy="120" r="3" fill="#3b82f6" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 3, repeat: Infinity, times: [0, 0.75, 1] }} />
-                  </g>
-                </motion.g>
-
-                {/* Floating Aesthetic Data Chips */}
-                <motion.g animate={{ y: [10, -10, 10], x: [-5, 5, -5] }} transition={{ duration: 6, ease: "easeInOut", repeat: Infinity, delay: 2 }}>
-                  <rect x="5" y="50" width="120" height="46" rx="23" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" filter="url(#soft-shadow)" />
-                  <circle cx="25" cy="73" r="4" fill="#6366f1" />
-                  <text x="40" y="77" fill="#0f172a" fontSize="12" fontWeight="800" fontFamily="sans-serif">ICU BED 04</text>
+                <motion.g animate={{ rotate: 360 }} transition={{ duration: 30, ease: "linear", repeat: Infinity }}>
+                  <circle cx="-160" cy="0" r="4" fill="#3b82f6" filter="url(#glow)" />
+                  <path d="M -150,0 A 160 160 0 0 1 -170,0" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" />
                 </motion.g>
 
               </g>
