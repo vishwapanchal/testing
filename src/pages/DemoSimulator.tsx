@@ -15,7 +15,8 @@ import {
 import {
   Shield, Activity, AlertTriangle, Heart, Thermometer,
   Wind, Droplets, Brain, Zap, Play, Pause, RotateCcw,
-  Timer, Clock, ChevronRight, Upload, User, Stethoscope
+  Timer, Clock, ChevronRight, Upload, User, Stethoscope,
+  MousePointer, Check
 } from "lucide-react";
 
 /* ── helpers ───────────────────────────────────────────────── */
@@ -32,6 +33,12 @@ const TIER_BG: Record<AlertLevel, string> = {
   "FAST-TRACK": "border-purple-200 bg-purple-50",
 };
 
+const STATUS_DOT_COLORS: Record<string, string> = {
+  LOW: "bg-blue-500",
+  HIGH: "bg-red-500",
+  NORMAL: "bg-emerald-500",
+};
+
 function vitalStatus(val: number, lo: number, hi: number) {
   if (val < lo) return { label: "LOW", cls: "text-blue-600 font-semibold" };
   if (val > hi) return { label: "HIGH", cls: "text-red-600 font-semibold" };
@@ -43,25 +50,35 @@ type DemoMode = "instant" | "manual" | "simulated";
 /* ── motion variants ───────────────────────────────────────── */
 const staggerContainer = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  show: { opacity: 1, transition: { staggerChildren: 0.06 } }
 };
 const fadeInUp = {
   hidden: { opacity: 0, y: 15 },
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
+const bentoItem = {
+  hidden: { opacity: 0, y: 20, scale: 0.97 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 /* ── premium card wrapper ──────────────────────────────────── */
-function PremiumCard({ children, className, ...props }: React.ComponentProps<typeof Card>) {
+function PremiumCard({ children, className, noBorderLeft, ...props }: React.ComponentProps<typeof Card> & { noBorderLeft?: boolean }) {
   return (
-    <Card 
-      className={cn(
-        "bg-white border border-slate-200 shadow-xl shadow-slate-200/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-slate-200/60",
-        className
-      )} 
-      {...props}
+    <motion.div
+      variants={bentoItem}
+      whileHover={{ y: -2, transition: { type: "spring", stiffness: 400 } }}
     >
-      {children}
-    </Card>
+      <Card 
+        className={cn(
+          "bg-white border border-slate-200/80 shadow-xl shadow-slate-200/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-slate-300/40",
+          !noBorderLeft && "border-l-4 border-l-blue-500/30",
+          className
+        )} 
+        {...props}
+      >
+        {children}
+      </Card>
+    </motion.div>
   );
 }
 
@@ -133,44 +150,63 @@ export default function DemoSimulator() {
   };
 
   /* ── SVG gauge ──────────────────────────────────────────── */
-  const gaugeRadius = 45;
+  const gaugeRadius = 50;
   const gaugeCirc = Math.PI * gaugeRadius;
   const gaugeOffset = result ? gaugeCirc - (result.risk_score * gaugeCirc) : gaugeCirc;
   const gaugeColor = !result ? "#e2e8f0" :
     result.alert_level === "CRITICAL" ? "#ef4444" :
     result.alert_level === "AMBER" ? "#f59e0b" : "#10b981";
+  const isCritical = result?.alert_level === "CRITICAL";
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-100 font-sans">
+    <div
+      className="min-h-screen text-slate-900 selection:bg-blue-100 font-sans"
+      style={{
+        backgroundColor: "#f8fafc",
+        backgroundImage: "radial-gradient(circle, #e2e8f0 1px, transparent 1px)",
+        backgroundSize: "20px 20px",
+      }}
+    >
       <GlobalNav />
 
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-4 shadow-sm z-10 relative">
+      <div className="bg-white/80 backdrop-blur-md border-b border-slate-200/60 px-4 sm:px-6 py-4 shadow-sm z-10 relative">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+            <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg shadow-blue-500/25">
               <Shield className="h-5 w-5" />
             </div>
-            <h1 className="text-lg font-bold text-slate-900 tracking-tight">Demo Simulator</h1>
+            <h1
+              className="text-lg font-bold text-slate-900 tracking-tight"
+              style={{ fontFamily: "'Outfit', sans-serif" }}
+            >
+              Demo Simulator
+            </h1>
             <Badge variant="outline" className="text-[10px] font-mono bg-slate-100 text-slate-600 border-slate-200 ml-2 shadow-sm">
               {result ? (result.backend === "client_fallback" ? "fallback" : result.backend) : "ensemble"}
             </Badge>
-            <Badge variant="outline" className="text-[10px] font-mono bg-blue-50 text-blue-700 border-blue-200 shadow-sm">
-              {mode === "instant" ? "⚡ Instant" : mode === "manual" ? "🖱️ Manual" : "⏱️ 15-min Cycle"}
+            <Badge variant="outline" className="text-[10px] font-mono bg-blue-50 text-blue-700 border-blue-200 shadow-sm flex items-center gap-1.5">
+              {mode === "instant" ? <><Zap className="h-3 w-3" /> Instant</> : mode === "manual" ? <><MousePointer className="h-3 w-3" /> Manual</> : <><Timer className="h-3 w-3" /> 15-min Cycle</>}
             </Badge>
           </div>
           <div className="flex items-center gap-4">
             {/* Mode selector */}
             <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-lg border border-slate-200 shadow-inner">
-              <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider pl-2">Mode</Label>
+              <Label className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 pl-2">Mode</Label>
               <Select value={mode} onValueChange={(v) => { setMode(v as DemoMode); setSimRunning(false); }}>
                 <SelectTrigger className="w-[170px] h-8 text-xs bg-white border-slate-200 shadow-sm font-medium rounded-md">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl shadow-xl border-slate-200">
-                  <SelectItem value="instant" className="text-xs focus:bg-slate-50">⚡ Demo Instant</SelectItem>
-                  <SelectItem value="manual" className="text-xs focus:bg-slate-50">🖱️ Manual (click)</SelectItem>
-                  <SelectItem value="simulated" className="text-xs focus:bg-slate-50">⏱️ 15-min Cycle</SelectItem>
+                  <SelectItem value="instant" className="text-xs focus:bg-slate-50">
+                    <span className="flex items-center gap-1.5"><Zap className="h-3 w-3" /> Demo Instant</span>
+                  </SelectItem>
+                  <SelectItem value="manual" className="text-xs focus:bg-slate-50">
+                    <span className="flex items-center gap-1.5"><MousePointer className="h-3 w-3" /> Manual (click)</span>
+                  </SelectItem>
+                  <SelectItem value="simulated" className="text-xs focus:bg-slate-50">
+                    <span className="flex items-center gap-1.5"><Timer className="h-3 w-3" /> 15-min Cycle</span>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -188,9 +224,9 @@ export default function DemoSimulator() {
           {/* ── LEFT: Controls ─────────────────────────── */}
           <motion.div variants={fadeInUp} className="lg:col-span-3 space-y-5">
             {/* Scenario */}
-            <PremiumCard>
-              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
-                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+            <PremiumCard className="border-l-indigo-500/40">
+              <CardHeader className="pb-3 border-b border-slate-100 bg-indigo-50/30">
+                <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
                   Patient Scenario
                 </CardTitle>
               </CardHeader>
@@ -214,9 +250,9 @@ export default function DemoSimulator() {
             </PremiumCard>
 
             {/* Phase 2: Demographics */}
-            <PremiumCard>
-              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
-                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+            <PremiumCard className="border-l-sky-500/40">
+              <CardHeader className="pb-3 border-b border-slate-100 bg-sky-50/30">
+                <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 flex items-center gap-2">
                   <User className="h-3.5 w-3.5 text-blue-500" /> Patient Demographics
                 </CardTitle>
               </CardHeader>
@@ -245,9 +281,9 @@ export default function DemoSimulator() {
             </PremiumCard>
 
             {/* Phase 2: CXR Upload */}
-            <PremiumCard>
-              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
-                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+            <PremiumCard className="border-l-violet-500/40">
+              <CardHeader className="pb-3 border-b border-slate-100 bg-violet-50/30">
+                <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 flex items-center gap-2">
                   <Upload className="h-3.5 w-3.5 text-indigo-500" /> Chest X-Ray
                 </CardTitle>
               </CardHeader>
@@ -311,15 +347,15 @@ export default function DemoSimulator() {
                 </AnimatePresence>
                 
                 {!cxrFile && (
-                  <p className="text-[11px] text-slate-500 font-medium text-center px-2">Upload a chest X-ray JPEG for AI-powered pulmonary analysis</p>
+                  <p className="text-[11px] text-slate-500 font-medium text-center px-2 leading-relaxed">Upload a chest X-ray JPEG for AI-powered pulmonary analysis</p>
                 )}
               </CardContent>
             </PremiumCard>
 
             {/* Vital Sliders */}
-            <PremiumCard>
-              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
-                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+            <PremiumCard className="border-l-rose-500/40">
+              <CardHeader className="pb-3 border-b border-slate-100 bg-rose-50/20">
+                <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 flex items-center gap-2">
                   <Activity className="h-3.5 w-3.5 text-rose-500" /> Vital Signs Input
                 </CardTitle>
               </CardHeader>
@@ -328,12 +364,12 @@ export default function DemoSimulator() {
                 <VitalSlider icon={<Droplets className="h-4 w-4 text-blue-500" />} label="MAP" unit="mmHg" value={vitals.map} min={30} max={140} step={1} onChange={(v) => updateVital("map", v)} />
                 <VitalSlider icon={<Thermometer className="h-4 w-4 text-orange-500" />} label="Temperature" unit="°C" value={vitals.temperature} min={33} max={42} step={0.1} onChange={(v) => updateVital("temperature", v)} />
                 <VitalSlider icon={<Wind className="h-4 w-4 text-cyan-500" />} label="Resp Rate" unit="br/min" value={vitals.resp_rate} min={5} max={45} step={1} onChange={(v) => updateVital("resp_rate", v)} />
-                <VitalSlider icon={<Droplets className="h-4 w-4 text-blue-400" />} label="SpO₂" unit="%" value={vitals.spo2} min={70} max={100} step={1} onChange={(v) => updateVital("spo2", v)} />
+                <VitalSlider icon={<Droplets className="h-4 w-4 text-blue-400" />} label="SpO2" unit="%" value={vitals.spo2} min={70} max={100} step={1} onChange={(v) => updateVital("spo2", v)} />
                 <VitalSlider icon={<Brain className="h-4 w-4 text-purple-500" />} label="GCS" unit="" value={vitals.gcs_total} min={3} max={15} step={1} onChange={(v) => updateVital("gcs_total", v)} />
                 <VitalSlider icon={<Zap className="h-4 w-4 text-amber-500" />} label="Lactate" unit="mmol/L" value={vitals.lactate} min={0.5} max={15} step={0.1} onChange={(v) => updateVital("lactate", v)} />
-                <VitalSlider icon={<Activity className="h-4 w-4 text-slate-400" />} label="WBC" unit="K/µL" value={vitals.wbc} min={0.5} max={40} step={0.5} onChange={(v) => updateVital("wbc", v)} />
+                <VitalSlider icon={<Activity className="h-4 w-4 text-slate-400" />} label="WBC" unit="K/uL" value={vitals.wbc} min={0.5} max={40} step={0.5} onChange={(v) => updateVital("wbc", v)} />
                 <VitalSlider icon={<Activity className="h-4 w-4 text-slate-400" />} label="Creatinine" unit="mg/dL" value={vitals.creatinine} min={0.3} max={8} step={0.1} onChange={(v) => updateVital("creatinine", v)} />
-                <VitalSlider icon={<Activity className="h-4 w-4 text-slate-400" />} label="Platelets" unit="K/µL" value={vitals.platelets} min={10} max={400} step={5} onChange={(v) => updateVital("platelets", v)} />
+                <VitalSlider icon={<Activity className="h-4 w-4 text-slate-400" />} label="Platelets" unit="K/uL" value={vitals.platelets} min={10} max={400} step={5} onChange={(v) => updateVital("platelets", v)} />
               </CardContent>
             </PremiumCard>
 
@@ -342,7 +378,7 @@ export default function DemoSimulator() {
               {mode === "manual" && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                   <Button 
-                    className="w-full h-12 text-sm font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 shadow-xl shadow-slate-900/20 transition-all" 
+                    className="w-full h-12 text-sm font-semibold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-xl shadow-blue-900/20 transition-all text-white" 
                     onClick={runPrediction} 
                     disabled={isLoading}
                   >
@@ -354,7 +390,7 @@ export default function DemoSimulator() {
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3">
                   <div className="flex gap-2">
                     <Button 
-                      className={cn("flex-1 h-10 text-xs font-semibold rounded-xl shadow-md transition-all", simRunning ? "bg-red-500 hover:bg-red-600 shadow-red-500/20 text-white" : "bg-slate-900 hover:bg-slate-800 shadow-slate-900/20 text-white")} 
+                      className={cn("flex-1 h-10 text-xs font-semibold rounded-xl shadow-md transition-all", simRunning ? "bg-red-500 hover:bg-red-600 shadow-red-500/20 text-white" : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-900/20 text-white")} 
                       onClick={() => setSimRunning(!simRunning)}
                     >
                       {simRunning ? <><Pause className="h-4 w-4 mr-1.5" /> Pause</> : <><Play className="h-4 w-4 mr-1.5" /> Start</>}
@@ -368,110 +404,161 @@ export default function DemoSimulator() {
                   </div>
                   <div className="flex items-center justify-center gap-2 text-[11px] font-mono font-medium text-slate-500 bg-slate-100/80 py-2 rounded-lg border border-slate-200/60">
                     <Timer className="h-3.5 w-3.5 text-slate-400" />
-                    Step {simStep} · <span className="text-slate-700 font-bold">{simStep * 15} min elapsed</span>
+                    Step {simStep} · <span className="text-slate-700 font-bold tabular-nums">{simStep * 15} min elapsed</span>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </motion.div>
 
-          {/* ── CENTER: Results ─────────────────────────── */}
+          {/* ── CENTER: Results (Bento Grid) ─────────────────────────── */}
           <motion.div variants={fadeInUp} className="lg:col-span-6 space-y-5">
             {/* Alert Banner */}
             <AnimatePresence>
               {result && (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  animate={
+                    isCritical
+                      ? { opacity: 1, scale: [1, 1.01, 1], transition: { scale: { repeat: Infinity, duration: 2.5, ease: "easeInOut" } } }
+                      : { opacity: 1, scale: 1 }
+                  }
                   className={cn(
-                    "border rounded-2xl p-5 text-center shadow-lg transition-all", 
-                    TIER_BG[result.alert_level]
+                    "rounded-2xl p-5 text-center shadow-lg transition-all overflow-hidden relative",
+                    result.alert_level === "CRITICAL"
+                      ? "bg-gradient-to-r from-red-600 to-rose-600 text-white border border-red-400/30"
+                      : result.alert_level === "AMBER"
+                      ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white border border-amber-400/30"
+                      : result.alert_level === "FAST-TRACK"
+                      ? "bg-gradient-to-r from-purple-600 to-violet-600 text-white border border-purple-400/30"
+                      : "bg-gradient-to-r from-emerald-500 to-teal-500 text-white border border-emerald-400/30"
                   )}
                 >
-                  <p className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">
-                    STATUS: <span className="font-mono uppercase px-2 py-0.5 rounded-lg bg-white/60 shadow-sm ml-1">{result.alert_level}</span>
+                  <p className="text-lg sm:text-xl font-bold tracking-tight">
+                    STATUS: <span className="font-mono uppercase px-2.5 py-0.5 rounded-lg bg-white/20 backdrop-blur-sm shadow-sm ml-1">{result.alert_level}</span>
                   </p>
                   <div className="flex items-center justify-center gap-4 mt-3">
-                    <span className="text-sm font-semibold text-slate-700 bg-white/70 px-4 py-1.5 rounded-full shadow-sm">
+                    <span className="text-sm font-semibold bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm tabular-nums font-mono">
                       Risk: {(result.risk_score * 100).toFixed(1)}%
                     </span>
-                    <span className="text-sm font-semibold text-slate-700 bg-white/70 px-4 py-1.5 rounded-full shadow-sm">
+                    <span className="text-sm font-semibold bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm tabular-nums font-mono">
                       Confidence: {(result.confidence * 100).toFixed(0)}%
                     </span>
                   </div>
                   {result.fast_tracked && (
                     <motion.p 
                       initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
-                      className="text-xs font-bold mt-4 text-purple-700 bg-purple-100/70 inline-block px-4 py-1.5 rounded-full shadow-sm"
+                      className="text-xs font-bold mt-4 bg-white/20 backdrop-blur-sm inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full shadow-sm"
                     >
-                      ⚡ FAST-TRACKED (Low Model Confidence)
+                      <Zap className="h-3 w-3" /> FAST-TRACKED (Low Model Confidence)
                     </motion.p>
                   )}
                 </motion.div>
               )}
             </AnimatePresence>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {/* Risk Gauge */}
-              <PremiumCard className="md:col-span-1">
-                <CardHeader className="pb-1 border-b border-slate-100 bg-slate-50/50">
-                  <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500 text-center">
+            {/* Bento Grid */}
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-2 gap-5"
+            >
+              {/* Risk Gauge — full width hero card */}
+              <PremiumCard className={cn("col-span-2 border-l-indigo-500/50", isCritical && "shadow-[0_0_30px_rgba(239,68,68,0.25)]")} noBorderLeft>
+                <CardHeader className="pb-1 border-b border-slate-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 text-center">
                     Risk Score
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-col items-center pt-5 pb-3">
-                  <div className="relative w-36 h-20">
-                    <svg viewBox="0 0 100 55" className="w-full h-full drop-shadow-sm">
-                      <path d="M 5 50 A 45 45 0 0 1 95 50" fill="none" stroke="#f1f5f9" strokeWidth="8" strokeLinecap="round" />
-                      <path d="M 5 50 A 45 45 0 0 1 95 50" fill="none" stroke={gaugeColor} strokeWidth="8" strokeLinecap="round"
-                        strokeDasharray={`${gaugeCirc}`} strokeDashoffset={gaugeOffset}
-                        style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s" }} />
+                <CardContent className="flex flex-col items-center pt-6 pb-4">
+                  <div className={cn("relative w-48 h-28", isCritical && "drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]")}>
+                    <svg viewBox="0 0 110 60" className="w-full h-full">
+                      <defs>
+                        <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#10b981" />
+                          <stop offset="50%" stopColor="#f59e0b" />
+                          <stop offset="100%" stopColor="#ef4444" />
+                        </linearGradient>
+                        {isCritical && (
+                          <filter id="gaugeGlow">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feMerge>
+                              <feMergeNode in="blur" />
+                              <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                          </filter>
+                        )}
+                      </defs>
+                      <path d="M 5 55 A 50 50 0 0 1 105 55" fill="none" stroke="#f1f5f9" strokeWidth="9" strokeLinecap="round" />
+                      <path
+                        d="M 5 55 A 50 50 0 0 1 105 55"
+                        fill="none"
+                        stroke="url(#gaugeGradient)"
+                        strokeWidth="9"
+                        strokeLinecap="round"
+                        strokeDasharray={`${gaugeCirc}`}
+                        strokeDashoffset={gaugeOffset}
+                        filter={isCritical ? "url(#gaugeGlow)" : undefined}
+                        style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }}
+                      />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-end pb-0">
-                      <span className="text-3xl font-bold tracking-tighter" style={{ color: gaugeColor !== "#e2e8f0" ? gaugeColor : "#94a3b8" }}>
-                        {result ? (result.risk_score * 100).toFixed(1) : "—"}%
+                      <span
+                        className="text-4xl font-black tracking-tighter tabular-nums font-mono"
+                        style={{ color: gaugeColor !== "#e2e8f0" ? gaugeColor : "#94a3b8" }}
+                      >
+                        {result ? (result.risk_score * 100).toFixed(1) : "\u2014"}%
                       </span>
                     </div>
                   </div>
-                  <p className="text-[10px] font-semibold text-slate-400 mt-3">0% (Safe) — 100% (Septic)</p>
+                  <p className="text-[10px] font-semibold text-slate-400 mt-4 tracking-wide">0% (Safe) \u2014 100% (Septic)</p>
                 </CardContent>
               </PremiumCard>
 
-              {/* Decision Summary */}
-              <PremiumCard className="md:col-span-1">
-                <CardHeader className="pb-2 border-b border-slate-100 bg-slate-50/50">
-                  <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              {/* Decision Summary — spans 1 col, taller */}
+              <PremiumCard className="row-span-2 border-l-amber-500/40">
+                <CardHeader className="pb-2 border-b border-slate-100 bg-amber-50/30">
+                  <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
                     Model Factors
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-3 space-y-2.5 text-xs font-medium">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-500">Alert Level</span>
-                    <Badge className={cn("text-[9px] font-bold uppercase px-1.5 py-0", result ? TIER_COLORS[result.alert_level] : "bg-slate-100 text-slate-400")}>{result?.alert_level ?? "—"}</Badge>
+                    <Badge className={cn("text-[9px] font-bold uppercase px-1.5 py-0", result ? TIER_COLORS[result.alert_level] : "bg-slate-100 text-slate-400")}>{result?.alert_level ?? "\u2014"}</Badge>
                   </div>
                   <div className="flex justify-between items-center border-t border-slate-50 pt-2">
                     <span className="text-slate-500">Tripwires</span>
-                    <span className="font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">{result?.n_active_tripwires ?? 0} / 7</span>
+                    <span className="font-mono font-black bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 tabular-nums">{result?.n_active_tripwires ?? 0} / 7</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-slate-50 pt-2">
                     <span className="text-slate-500">LSTM</span>
-                    <span className="font-mono text-slate-700 font-semibold">{result?.lstm_score?.toFixed(3) ?? "—"}</span>
+                    <span className="font-mono text-slate-700 font-semibold tabular-nums">{result?.lstm_score?.toFixed(3) ?? "\u2014"}</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-slate-50 pt-2">
                     <span className="text-slate-500">XGBoost</span>
-                    <span className="font-mono text-slate-700 font-semibold">{result?.xgb_score?.toFixed(3) ?? "—"}</span>
+                    <span className="font-mono text-slate-700 font-semibold tabular-nums">{result?.xgb_score?.toFixed(3) ?? "\u2014"}</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-slate-50 pt-2">
                     <span className="text-slate-500">Conformal</span>
-                    <span className="font-mono text-[9px] text-slate-600 bg-slate-50 px-1 py-0.5 rounded font-semibold">[{result?.conformal_interval?.[0]?.toFixed(2) ?? "-"}, {result?.conformal_interval?.[1]?.toFixed(2) ?? "-"}]</span>
+                    <span className="font-mono text-[9px] text-slate-600 bg-slate-50 px-1 py-0.5 rounded font-semibold tabular-nums">[{result?.conformal_interval?.[0]?.toFixed(2) ?? "-"}, {result?.conformal_interval?.[1]?.toFixed(2) ?? "-"}]</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
+                    <span className="text-slate-500">Confidence</span>
+                    <span className="font-mono text-slate-700 font-semibold tabular-nums">{result ? (result.confidence * 100).toFixed(0) + "%" : "\u2014"}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2">
+                    <span className="text-slate-500">Fast-Tracked</span>
+                    <span className="font-mono text-slate-700 font-semibold">{result?.fast_tracked ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : "\u2014"}</span>
                   </div>
                 </CardContent>
               </PremiumCard>
 
-              {/* Vitals Snapshot */}
-              <PremiumCard className="md:col-span-1">
-                <CardHeader className="pb-2 border-b border-slate-100 bg-slate-50/50">
-                  <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              {/* Vitals Snapshot — spans 1 col */}
+              <PremiumCard className="border-l-emerald-500/40">
+                <CardHeader className="pb-2 border-b border-slate-100 bg-emerald-50/30">
+                  <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
                     Vitals Status
                   </CardTitle>
                 </CardHeader>
@@ -480,8 +567,8 @@ export default function DemoSimulator() {
                     {[
                       { label: "Heart Rate", val: vitals.heart_rate, unit: "bpm", lo: 60, hi: 100 },
                       { label: "MAP", val: vitals.map, unit: "mmHg", lo: 70, hi: 105 },
-                      { label: "Temp", val: vitals.temperature, unit: "°C", lo: 36.0, hi: 38.3 },
-                      { label: "SpO₂", val: vitals.spo2, unit: "%", lo: 95, hi: 100 },
+                      { label: "Temp", val: vitals.temperature, unit: "\u00b0C", lo: 36.0, hi: 38.3 },
+                      { label: "SpO2", val: vitals.spo2, unit: "%", lo: 95, hi: 100 },
                       { label: "Lactate", val: vitals.lactate, unit: "mM", lo: 0.5, hi: 2.0 },
                     ].map((v) => {
                       const s = vitalStatus(v.val, v.lo, v.hi);
@@ -489,8 +576,8 @@ export default function DemoSimulator() {
                         <div key={v.label} className="flex justify-between items-center border-b border-slate-50 last:border-0 pb-1.5 last:pb-0">
                           <span className="text-slate-500">{v.label}</span>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-slate-700 font-semibold">{v.val.toFixed(v.unit === "°C" || v.unit === "mM" ? 1 : 0)}</span>
-                            <span className={cn("text-[9px] w-12 text-right tracking-tight", s.cls)}>{s.label}</span>
+                            <span className="font-mono text-slate-700 font-semibold tabular-nums">{v.val.toFixed(v.unit === "\u00b0C" || v.unit === "mM" ? 1 : 0)}</span>
+                            <span className={cn("w-2 h-2 rounded-full shrink-0", STATUS_DOT_COLORS[s.label])} />
                           </div>
                         </div>
                       );
@@ -498,15 +585,34 @@ export default function DemoSimulator() {
                   </div>
                 </CardContent>
               </PremiumCard>
-            </div>
 
-            {/* Tripwires */}
+              {/* Pipeline Architecture — spans 1 col */}
+              <PremiumCard className="border-l-slate-400/40">
+                <CardHeader className="pb-2 border-b border-slate-100 bg-slate-50/50">
+                  <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
+                    Pipeline Architecture
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-3 space-y-2 text-xs font-medium">
+                  <div className="flex justify-between items-center"><span className="text-slate-500">Backend</span><Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-bold shadow-sm text-[9px]">{result?.backend === "client_fallback" ? "Client Fallback" : "AWS EC2 API"}</Badge></div>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">LSTM Weight</span><span className="font-mono text-slate-700 font-semibold tabular-nums">30%</span></div>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">XGBoost Weight</span><span className="font-mono text-slate-700 font-semibold tabular-nums">70%</span></div>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">Conformal q_a</span><span className="font-mono text-slate-700 font-semibold tabular-nums">0.2663</span></div>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">Tripwires</span><span className="font-mono text-slate-700 font-semibold">7+2 imaging</span></div>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">CXR Model</span><span className="font-mono text-slate-700 font-semibold">DenseNet121</span></div>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">LLM Agent</span><span className="font-mono text-slate-700 font-semibold">Llama 3.2 3B</span></div>
+                  <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">Normalization</span><span className="font-mono text-slate-700 font-semibold">MIMIC-IV</span></div>
+                </CardContent>
+              </PremiumCard>
+            </motion.div>
+
+            {/* Tripwires — full width below bento */}
             <AnimatePresence>
               {result && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                  <PremiumCard>
-                    <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
-                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-slate-700 flex items-center gap-2">
+                  <PremiumCard className="border-l-amber-500/50" noBorderLeft>
+                    <CardHeader className="pb-3 border-b border-slate-100 bg-amber-50/30">
+                      <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 flex items-center gap-2">
                         <AlertTriangle className={cn("h-4 w-4", result.n_active_tripwires > 0 ? "text-amber-500" : "text-slate-400")} />
                         Clinical Tripwires
                         <Badge variant="secondary" className="ml-2 bg-slate-200 text-slate-700 hover:bg-slate-200">{result.n_active_tripwires} active</Badge>
@@ -518,19 +624,20 @@ export default function DemoSimulator() {
                         {result.tripwires.map((tw) => (
                           <motion.div 
                             whileHover={{ scale: 1.02 }}
+                            layout
                             key={tw.name} 
                             className={cn(
                               "p-3 rounded-xl border transition-colors",
                               tw.triggered
-                                ? "border-red-200 bg-red-50/50 shadow-sm"
-                                : "border-slate-100 bg-slate-50/50"
+                                ? "border-red-200 bg-red-50/50 shadow-sm border-l-4 border-l-red-500"
+                                : "border-slate-100 bg-slate-50/50 border-l-4 border-l-slate-200"
                             )}
                           >
                             <div className="flex justify-between items-center mb-1">
                               <span className={cn("text-xs font-bold", tw.triggered ? "text-red-700" : "text-slate-600")}>{tw.name}</span>
-                              <span className={cn("font-mono text-xs font-semibold", tw.triggered ? "text-red-600" : "text-slate-500")}>{tw.value.toFixed(1)}</span>
+                              <span className={cn("font-mono text-xs font-semibold tabular-nums", tw.triggered ? "text-red-600" : "text-slate-500")}>{tw.value.toFixed(1)}</span>
                             </div>
-                            <p className={cn("text-[11px] font-medium leading-tight", tw.triggered ? "text-red-600/80" : "text-slate-400")}>
+                            <p className={cn("text-[11px] font-medium leading-relaxed", tw.triggered ? "text-red-600/80" : "text-slate-400")}>
                               {tw.triggered ? tw.reason : "Normal parameter range"}
                             </p>
                           </motion.div>
@@ -546,9 +653,9 @@ export default function DemoSimulator() {
             <AnimatePresence>
               {result && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                  <PremiumCard className="border-blue-100 shadow-blue-900/5">
-                    <CardHeader className="pb-3 border-b border-blue-50 bg-blue-50/50">
-                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-blue-700 flex items-center gap-2">
+                  <PremiumCard className="border-l-blue-500/50">
+                    <CardHeader className="pb-3 border-b border-blue-100/60 bg-gradient-to-r from-blue-50 to-indigo-50">
+                      <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-blue-700 flex items-center gap-2">
                         <Activity className="h-4 w-4" /> Recommended Actions
                       </CardTitle>
                     </CardHeader>
@@ -577,9 +684,9 @@ export default function DemoSimulator() {
             <AnimatePresence>
               {result?.cxr_findings && result.cxr_findings.findings && result.cxr_findings.findings.length > 0 && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <PremiumCard className="border-cyan-200 bg-gradient-to-b from-cyan-50/50 to-white shadow-cyan-900/5">
+                  <PremiumCard className="border-l-cyan-500/50 border-cyan-200 bg-gradient-to-b from-cyan-50/50 to-white shadow-cyan-900/5">
                     <CardHeader className="pb-3 border-b border-cyan-100/50">
-                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-cyan-800 flex items-center gap-2">
+                      <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-cyan-800 flex items-center gap-2">
                         <Upload className="h-4 w-4 text-cyan-600" /> CXR AI Findings
                         <Badge variant="outline" className="ml-auto border-cyan-200 text-cyan-700 bg-cyan-50 text-[9px] font-semibold">
                           DenseNet121 · CheXpert
@@ -613,9 +720,9 @@ export default function DemoSimulator() {
             <AnimatePresence>
               {result?.clinical_narrative && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                  <PremiumCard className="border-violet-200 bg-gradient-to-b from-violet-50/50 to-white shadow-violet-900/5">
+                  <PremiumCard className="border-l-violet-500/50 border-violet-200 bg-gradient-to-b from-violet-50/50 to-white shadow-violet-900/5">
                     <CardHeader className="pb-3 border-b border-violet-100/50">
-                      <CardTitle className="text-xs font-bold uppercase tracking-widest text-violet-800 flex items-center gap-2">
+                      <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-violet-800 flex items-center gap-2">
                         <Stethoscope className="h-4 w-4 text-violet-600" /> Clinical AI Assessment
                         <Badge variant="outline" className="ml-auto border-violet-200 text-violet-700 bg-violet-50 text-[9px] font-semibold">
                           Llama 3.2 3B
@@ -637,7 +744,7 @@ export default function DemoSimulator() {
               {result?.demographics && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-center gap-2 text-xs font-medium text-slate-500 py-2">
                   <User className="h-3.5 w-3.5 text-slate-400" />
-                  Patient context: <span className="text-slate-700 font-bold">{result.demographics.age}y {result.demographics.gender}</span> — {result.demographics.age_risk_note}
+                  Patient context: <span className="text-slate-700 font-bold tabular-nums">{result.demographics.age}y {result.demographics.gender}</span> — <span className="leading-relaxed">{result.demographics.age_risk_note}</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -645,16 +752,16 @@ export default function DemoSimulator() {
 
           {/* ── RIGHT: Timeline ────────────────────────── */}
           <motion.div variants={fadeInUp} className="lg:col-span-3 space-y-5">
-            <PremiumCard>
-              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
-                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+            <PremiumCard className="border-l-sky-500/40">
+              <CardHeader className="pb-3 border-b border-slate-100 bg-sky-50/30">
+                <CardTitle className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 flex items-center gap-2">
                   <Clock className="h-3.5 w-3.5 text-slate-400" /> Risk Timeline
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
                 {history.length === 0 ? (
                   <div className="h-32 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
-                    <p className="text-xs text-slate-400 font-medium text-center px-4">
+                    <p className="text-xs text-slate-400 font-medium text-center px-4 leading-relaxed">
                       Adjust vitals or run simulation to build timeline
                     </p>
                   </div>
@@ -674,31 +781,12 @@ export default function DemoSimulator() {
                         </div>
                       ))}
                     </div>
-                    <div className="flex justify-between text-[10px] font-mono font-bold text-slate-400 px-1">
+                    <div className="flex justify-between text-[10px] font-mono font-bold text-slate-400 px-1 tabular-nums">
                       <span>{history[0]?.time}</span>
                       <span>{history[history.length - 1]?.time}</span>
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </PremiumCard>
-
-            {/* Pipeline Info */}
-            <PremiumCard>
-              <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
-                <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                  Pipeline Architecture
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4 space-y-3 text-xs font-medium">
-                <div className="flex justify-between items-center"><span className="text-slate-500">Backend</span><Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 font-bold shadow-sm">{result?.backend === "client_fallback" ? "Client Fallback" : "AWS EC2 API"}</Badge></div>
-                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">LSTM Weight</span><span className="font-mono text-slate-700 font-semibold">30%</span></div>
-                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">XGBoost Weight</span><span className="font-mono text-slate-700 font-semibold">70%</span></div>
-                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">Conformal q_α</span><span className="font-mono text-slate-700 font-semibold">0.2663</span></div>
-                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">Tripwires</span><span className="font-mono text-slate-700 font-semibold">7+2 imaging</span></div>
-                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">CXR Model</span><span className="font-mono text-slate-700 font-semibold">DenseNet121</span></div>
-                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">LLM Agent</span><span className="font-mono text-slate-700 font-semibold">Llama 3.2 3B</span></div>
-                <div className="flex justify-between items-center border-t border-slate-50 pt-2"><span className="text-slate-500">Normalization</span><span className="font-mono text-slate-700 font-semibold">MIMIC-IV</span></div>
               </CardContent>
             </PremiumCard>
           </motion.div>
@@ -718,7 +806,7 @@ function VitalSlider({ icon, label, unit, value, min, max, step, onChange }: {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">{icon} {label}</div>
-        <span className="text-sm font-mono font-bold text-slate-900 bg-slate-100 px-3 py-1.5 rounded-lg shadow-sm border border-slate-200">
+        <span className="text-sm font-mono font-black text-slate-900 bg-slate-100 px-3 py-1.5 rounded-lg shadow-sm border border-slate-200 tabular-nums">
           {step < 1 ? value.toFixed(1) : value} <span className="text-[10px] text-slate-500 ml-0.5">{unit}</span>
         </span>
       </div>
